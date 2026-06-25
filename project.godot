@@ -27,6 +27,8 @@ PlayerDataManager="*res://scripts/core/player_data_manager.gd"
 AudioManager="*res://scripts/core/audio_manager.gd"
 ApiClient="*res://scripts/core/api_client.gd"
 DatabaseManager="*res://scripts/SQLite/db_manager.gd"
+SupabaseSyncManager="*res://scripts/core/supabase_sync_manager.gd"
+MathManager="*res://scripts/gameplay/math/math_manager.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]
@@ -35,7 +37,6 @@ window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/subwindows/embed_subwindows=false
 window/stretch/mode="viewport"
-window/stretch/aspect="keep"
 
 [editor_plugins]
 

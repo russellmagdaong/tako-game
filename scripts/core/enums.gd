@@ -25,6 +25,12 @@ enum ECharacterAnimation {
 enum LevelName {
 	Billiards,
 	Level0,
+	School,
+	Math,
+	Grade7,
+	Grade8,
+	Grade9,
+	Grade10,
 }
 
 enum LevelGroup {

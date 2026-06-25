@@ -87,7 +87,7 @@ Open the in-game menu → **Settings** → **Clear Save Data** (tap twice to con
 | Name | Role |
 |---|---|
 | Balajadia, Vin Tristan E. | Database Administrator |
-| Gilo, Eric Jonhson H. | All-around Helper |
+| Gilo, Eric Jonhson H. | Backend Developer |
 | Guillermo, Christian P. | UI/UX Designer |
 | Magdaong, Russell D. | Game Developer |
 

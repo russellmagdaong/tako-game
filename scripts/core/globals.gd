@@ -11,6 +11,8 @@ extends Node
 
 @export_category("Session")
 @export var selected_character: String = "playerm"
+var preferred_language: String = "en"
+
 
 # HashSet<string> → Dictionary with dummy values for O(1) has().
 var defeated_enemies: Dictionary = {}

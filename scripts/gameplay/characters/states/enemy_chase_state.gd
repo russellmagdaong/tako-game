@@ -28,7 +28,7 @@ func _process(delta: float) -> void:
 		return
 
 	var enemy: Enemy = state_owner as Enemy
-	if enemy == null:
+	if enemy == null or enemy.is_defeated:
 		return
 
 	var player: Node = GameManager.get_player()

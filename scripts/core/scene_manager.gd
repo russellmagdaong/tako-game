@@ -146,7 +146,7 @@ func switch_player(trigger: int, tile_offset: int = 0) -> void:
 	var triggers: Array = current_level.get_tree().get_nodes_in_group(Enums.LevelGroup.keys()[Enums.LevelGroup.SCENETRIGGERS])
 	var scene_trigger: SceneTrigger = null
 	for candidate in triggers:
-		if candidate is SceneTrigger and candidate.current_level_trigger == trigger:
+		if candidate is SceneTrigger and candidate.arrival_id == trigger:
 			scene_trigger = candidate
 			break
 	if scene_trigger == null:
@@ -243,7 +243,10 @@ func end_battle() -> void:
 		_award_level_achievement()
 
 	if not is_final and enemy != null:
-		enemy.queue_free()
+		if enemy.has_method("set_defeated"):
+			enemy.set_defeated()
+		else:
+			enemy.queue_free()
 	battle_enemy = null
 	is_battling = false
 

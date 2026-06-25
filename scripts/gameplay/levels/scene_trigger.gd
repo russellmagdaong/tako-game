@@ -1,12 +1,12 @@
 class_name SceneTrigger
 extends Area2D
 
-@export_category("Target Scene Vars")
-@export var target_level_name: int = Enums.LevelName.Level0
-@export var target_level_trigger: int = 0
+@export_category("Destination")
+@export var to_level: Enums.LevelName = Enums.LevelName.Level0
+@export var to_trigger: int = 0
 
-@export_category("Current Scene Vars")
-@export var current_level_trigger: int = 0
+@export_category("Arrival")
+@export var arrival_id: int = 0
 @export var entry_direction: Vector2 = Vector2.ZERO
 @export var locked: bool = false
 
@@ -40,7 +40,7 @@ func _on_body_entered(body: Node2D) -> void:
 	elif dir.x != 0:
 		tile_offset = roundi((body.global_position.y - global_position.y) / Globals.grid_size)
 
-	SceneManager.change_level(target_level_name, target_level_trigger, tile_offset)
+	SceneManager.change_level(to_level, to_trigger, tile_offset)
 
 func _on_body_exited(body: Node2D) -> void:
 	if body.name != "Player":

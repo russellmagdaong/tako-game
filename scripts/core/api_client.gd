@@ -28,25 +28,43 @@ func _ready() -> void:
 # Public API
 # ---------------------------------------------------------------------------
 
-func generate_question(skill_type: String) -> void:
+func generate_question(skill_type: String, lang: String = "en") -> void:
+	var prompt_instructions := MathManager.setup_new_question(skill_type, lang)
+	if prompt_instructions.is_empty():
+		GameLogger.error("ApiClient: Failed to set up math question.")
+		return
+		
+	var lang_instruction := "Write the question and hint strictly in English."
+	if lang == "tl":
+		lang_instruction = "Write the question and hint strictly in Tagalog (Filipino)."
+		
 	var prompt := (
-		"You are a math teacher creating a question for a student game.\n"
-		+ "Generate one %s math question appropriate for a middle-school student.\n" % skill_type
-		+ "Return ONLY valid JSON with exactly these three fields:\n"
-		+ "{\"question\": \"the full question text\", "
-		+ "\"answer\": \"the correct answer as a number or simple expression\", "
-		+ "\"hint\": \"a brief hint to help if they are stuck\"}"
+		"You are a friendly, in-character math companion.\n"
+		+ "Based on these parameters, construct a short, fun math question:\n"
+		+ "%s\n" % prompt_instructions
+		+ lang_instruction + "\n"
+		+ "Return ONLY valid JSON with exactly these two fields:\n"
+		+ "{\"question\": \"the creative question text\", \"hint\": \"a helpful hint to guide them\"}"
 	)
 	_enqueue({"model": model, "prompt": prompt, "stream": false, "format": "json"}, "question_generate")
 
-func generate_feedback(question: String, expected: String, player_answer: String) -> void:
+func generate_feedback(question: String, expected: String, player_answer: String, misconception: String = "", lang: String = "en") -> void:
+	var lang_instruction := "Write the feedback strictly in English."
+	if lang == "tl":
+		lang_instruction = "Write the feedback strictly in Tagalog (Filipino)."
+		
+	var misconception_hint := ""
+	if not misconception.is_empty():
+		misconception_hint = "The student made a specific mistake categorized as: %s.\n" % misconception
+		
 	var prompt := (
 		"A student answered a math question incorrectly in a game.\n"
 		+ "Question: %s\n" % question
 		+ "Correct answer: %s\n" % expected
 		+ "Student's answer: %s\n" % player_answer
-		+ "Write a short, encouraging message (1-2 sentences) that explains the mistake "
-		+ "and nudges them toward the right answer without giving it away.\n"
+		+ misconception_hint
+		+ "Write a short, encouraging message (1-2 sentences) explaining their mistake and guiding them to the correct method.\n"
+		+ lang_instruction + "\n"
 		+ "Return ONLY valid JSON: {\"feedback\": \"your message here\"}"
 	)
 	_enqueue({"model": model, "prompt": prompt, "stream": false, "format": "json"}, "feedback_generate")

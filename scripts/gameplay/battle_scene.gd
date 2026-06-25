@@ -1,14 +1,12 @@
 extends Control
 
 var _answer_input: LineEdit
-var _output_text: Label
+var _status_label: Label
 var _submit_btn: Button
-var _hints_popup: Panel
-var _unlocked_hints: Array[String] = []
+var _calc_overlay: Control
 
 var _current_question: String = ""
 var _expected_answer: String = ""
-var _current_hint: String = ""
 var _attempt_count: int = 0
 var _skill_type: String = ""
 var _awaiting_ai: bool = false
@@ -22,24 +20,17 @@ func _ready() -> void:
 		theme = Globals.instance.ui_theme
 
 	_answer_input = get_node("%AnswerInput")
-	_output_text  = get_node("%OutputText")
+	_status_label = get_node("%StatusLabel")
 	_submit_btn   = get_node("%SubmitButton")
+
+	_calc_overlay = get_node("%CalcOverlay")
+	get_node("%CalcToggle").pressed.connect(_on_calc_toggle_pressed)
 
 	_submit_btn.disabled = true
 	_submit_btn.pressed.connect(_on_submit_pressed)
 	_answer_input.text_submitted.connect(_on_answer_submitted)
 
-	var hint_btn = _answer_input.get_parent().get_node("TitleRow/HintButton")
-	if hint_btn:
-		hint_btn.hint_requested.connect(_on_hint_pressed)
-
-	_hints_popup = get_node("HintsPopup")
-	_hints_popup.close_requested.connect(_on_hints_popup_close_requested)
-	_hints_popup.request_hint_requested.connect(_on_request_hint_requested)
-	_hints_popup.hide()
-
 	_setup_sprites()
-	call_deferred("_apply_zoom")
 
 	var enemy = SceneManager.battle_enemy
 	_skill_type = _skill_name(enemy.get("skill_type") if enemy != null else 0)
@@ -48,11 +39,31 @@ func _ready() -> void:
 	ApiClient.feedback_generated.connect(_on_feedback_generated)
 	ApiClient.request_failed.connect(_on_request_failed)
 
-	set_problem_text("Generating question...")
+	_build_calc_pad()
+
+	set_problem_text("Generating question..." if Globals.preferred_language == "en" else "Bumubuo ng tanong...")
 	_set_output_text("")
-	ApiClient.generate_question(_skill_type)
+	ApiClient.generate_question(_skill_type, Globals.preferred_language)
 
 	call_deferred("_maybe_show_battle_tutorial")
+
+	if OS.is_debug_build():
+		_add_debug_skip_button()
+
+func _add_debug_skip_button() -> void:
+	var btn := Button.new()
+	btn.text = "[DEBUG] Skip"
+	btn.anchor_right = 1.0
+	btn.anchor_left = 1.0
+	btn.anchor_bottom = 1.0
+	btn.anchor_top = 1.0
+	btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	btn.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	btn.offset_left = -160.0
+	btn.offset_top = -60.0
+	btn.modulate = Color(1, 0.4, 0.4)
+	btn.pressed.connect(func(): SceneManager.end_battle())
+	add_child(btn)
 
 func _exit_tree() -> void:
 	if ApiClient.question_generated.is_connected(_on_question_generated):
@@ -77,20 +88,42 @@ func _submit_answer() -> void:
 		return
 	var player_answer := _answer_input.text.strip_edges()
 	if player_answer.is_empty():
-		_set_output_text("Type your answer first.")
+		_set_output_text("Type your answer first." if Globals.preferred_language == "en" else "I-type muna ang iyong sagot.")
 		return
 
 	_attempt_count += 1
 	_submit_btn.disabled = true
 
-	if _is_correct_answer(player_answer, _expected_answer):
-		_set_output_text("Correct!")
+	var check_result := MathManager.verify_player_answer(player_answer)
+	if check_result["is_correct"]:
+		_set_output_text("Correct!" if Globals.preferred_language == "en" else "Tama!")
+		if DatabaseManager.is_initialized and not PlayerDataManager.user_id.is_empty():
+			var enemy = SceneManager.battle_enemy
+			var enemy_id = enemy.enemy_id if enemy != null else "enemy"
+			DatabaseManager.add_question_attempt(PlayerDataManager.user_id, "math", MathManager.active_template.grade, enemy_id, true)
 		await get_tree().create_timer(2.0).timeout
 		SceneManager.end_battle()
 	else:
 		_awaiting_ai = true
-		_set_output_text("Checking...")
-		ApiClient.generate_feedback(_current_question, _expected_answer, player_answer)
+		_set_output_text("Checking..." if Globals.preferred_language == "en" else "Sinusuri...")
+		if DatabaseManager.is_initialized and not PlayerDataManager.user_id.is_empty():
+			var enemy = SceneManager.battle_enemy
+			var enemy_id = enemy.enemy_id if enemy != null else "enemy"
+			DatabaseManager.add_question_attempt(
+				PlayerDataManager.user_id,
+				"math",
+				MathManager.active_template.grade,
+				enemy_id,
+				false,
+				check_result["misconception"]
+			)
+		ApiClient.generate_feedback(
+			_current_question,
+			MathManager.active_expected_answer,
+			player_answer,
+			check_result["misconception"],
+			Globals.preferred_language
+		)
 
 func _is_correct_answer(player: String, expected: String) -> bool:
 	if player.strip_edges().to_lower() == expected.strip_edges().to_lower():
@@ -102,33 +135,12 @@ func _is_correct_answer(player: String, expected: String) -> bool:
 	return false
 
 # ---------------------------------------------------------------------------
-# Hint handling
+# Calculator overlay
 # ---------------------------------------------------------------------------
 
-func _on_hint_pressed() -> void:
-	if _hints_popup.visible:
-		_hints_popup.hide()
-		return
-	if _unlocked_hints.is_empty() and not _current_hint.is_empty():
-		_hints_popup.clear_hints()
-		_unlocked_hints.append(_current_hint)
-		_hints_popup.add_hint(_current_hint)
-	elif _unlocked_hints.is_empty():
-		_hints_popup.show_no_hints_message()
-	_hints_popup.show()
-
-func _on_hints_popup_close_requested() -> void:
-	_hints_popup.hide()
-
-func _on_request_hint_requested() -> void:
-	_hints_popup.hide()
-	if _current_hint.is_empty():
-		return
-	if not _unlocked_hints.has(_current_hint):
-		_unlocked_hints.append(_current_hint)
-		_hints_popup.clear_hints()
-		_hints_popup.add_hint(_current_hint)
-	await _show_dialogue("Guide", _current_hint)
+func _on_calc_toggle_pressed() -> void:
+	_calc_overlay.visible = not _calc_overlay.visible
+	get_node("%CalcToggle").text = "Calc ▼" if _calc_overlay.visible else "Calc ▲"
 
 # ---------------------------------------------------------------------------
 # AI responses
@@ -137,16 +149,18 @@ func _on_request_hint_requested() -> void:
 func _on_question_generated(data: Dictionary) -> void:
 	var question: String = data.get("question", "")
 	var answer: String   = data.get("answer",   "")
-	var hint: String     = data.get("hint",      "")
 
-	if question.is_empty() or answer.is_empty():
-		set_problem_text("(Could not generate question — is Ollama running?)")
-		_set_output_text("Make sure Ollama is installed and running locally.")
+	if question.is_empty():
+		if Globals.preferred_language == "tl":
+			set_problem_text("(Hindi makabuo ng tanong — tumatakbo ba ang Ollama?)")
+			_set_output_text("Siguraduhing naka-install at tumatakbo ang Ollama.")
+		else:
+			set_problem_text("(Could not generate question — is Ollama running?)")
+			_set_output_text("Make sure Ollama is installed and running locally.")
 		return
 
 	_current_question = question
 	_expected_answer  = answer
-	_current_hint     = hint
 	set_problem_text(question)
 	_submit_btn.disabled = false
 	_answer_input.grab_focus()
@@ -179,7 +193,7 @@ func _maybe_show_battle_tutorial() -> void:
 		["Guide", "Welcome to your first math battle!"],
 		["Guide", "A math question will appear in the panel on the right. Read it carefully."],
 		["Guide", "Type your answer in the input field, then press Submit (or hit Enter)."],
-		["Guide", "If you need a nudge, tap the Hint button. Good luck!"],
+		["Guide", "Use the Calc button to open the calculator if you need it. Good luck!"],
 	]
 	var entries: Array[DialogueEntry] = []
 	for line in lines:
@@ -207,20 +221,6 @@ static func _skill_name(index: int) -> String:
 # Visual setup (unchanged from original)
 # ---------------------------------------------------------------------------
 
-func _apply_zoom() -> void:
-	var hgap = get_node("MarginContainer/ContentSplit/LeftVBox/VisualPanel/VisualHBox/HGap")
-	if hgap:
-		hgap.custom_minimum_size.x = 16.0
-	var bg           = get_node("%BattleBG")
-	var visual_hbox  = get_node("MarginContainer/ContentSplit/LeftVBox/VisualPanel/VisualHBox")
-	var zoom_scale   = Vector2(2.0, 2.0)
-	if bg:
-		bg.pivot_offset = bg.size / 2.0
-		bg.scale = zoom_scale
-	if visual_hbox:
-		visual_hbox.pivot_offset = visual_hbox.size / 2.0
-		visual_hbox.scale = zoom_scale
-		visual_hbox.position.y += 10.0
 
 func _setup_sprites() -> void:
 	var enemy_display  = get_node("%EnemyDisplay")
@@ -232,12 +232,7 @@ func _setup_sprites() -> void:
 		enemy_display.custom_minimum_size = Vector2(0, ENEMY_SPRITE_HEIGHT)
 	enemy_display.texture = _load_battle_texture("player", character)
 	var bg = get_node("%BattleBG")
-	if enemy != null and is_final_boss:
-		bg.texture = _load_battle_texture("bg", "boss")
-	else:
-		var enemy_id: String = enemy.enemy_id if enemy != null else ""
-		var bg_tex := _load_battle_texture("bg", enemy_id)
-		bg.texture = bg_tex if bg_tex != null else _load_battle_texture("bg", "default")
+	bg.texture = _load_battle_texture("bg", "11")
 	if enemy != null:
 		if is_final_boss:
 			var boss_char = "playerf" if character == "playerm" else "playerm"
@@ -260,21 +255,44 @@ func _load_battle_texture(folder: String, texture_name: String) -> Texture2D:
 	return load(path) if ResourceLoader.exists(path) else null
 
 func _set_output_text(text: String) -> void:
-	_output_text.text = text
-	call_deferred("_adjust_output_font_size")
+	_status_label.text = text
 
-func _adjust_output_font_size() -> void:
-	var scroll := get_node("MarginContainer/ContentSplit/LeftVBox/OutputPanel/OutputMargin/OutputVBox/OutputScroll") as Control
-	var available := scroll.size.y
-	var width := _output_text.size.x
-	if width <= 0 or available <= 0:
-		return
-	var font = _output_text.get_theme_font("font")
-	for f_size in range(24, 7, -1):
-		_output_text.add_theme_font_size_override("font_size", f_size)
-		var text_size = font.get_multiline_string_size(_output_text.text, HORIZONTAL_ALIGNMENT_LEFT, width, f_size)
-		if text_size.y <= available:
-			return
+const _CALC_LAYOUT: Array = [
+	["sin", "cos", "tan", "^",  "π"],
+	["7",   "8",   "9",   "÷",  "⌫"],
+	["4",   "5",   "6",   "×",  "AC"],
+	["1",   "2",   "3",   "-",  "("],
+	["0",   ".",   "x",   "+",  ")"],
+]
+
+func _build_calc_pad() -> void:
+	var grid := get_node("%CalcGrid")
+	for row in _CALC_LAYOUT:
+		for symbol: String in row:
+			var btn := Button.new()
+			btn.text = symbol
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn.size_flags_vertical   = Control.SIZE_EXPAND_FILL
+			btn.custom_minimum_size   = Vector2(0, 52)
+			btn.pressed.connect(_on_calc_pressed.bind(symbol))
+			grid.add_child(btn)
+
+func _on_calc_pressed(symbol: String) -> void:
+	match symbol:
+		"⌫":
+			if not _answer_input.text.is_empty():
+				_answer_input.text = _answer_input.text.left(_answer_input.text.length() - 1)
+		"AC":
+			_answer_input.text = ""
+		"÷":
+			_answer_input.text += "/"
+		"×":
+			_answer_input.text += "*"
+		"sin", "cos", "tan":
+			_answer_input.text += symbol + "("
+		_:
+			_answer_input.text += symbol
+	_answer_input.caret_column = _answer_input.text.length()
 
 func set_problem_text(text: String) -> void:
 	var label = get_node("%ProblemText")

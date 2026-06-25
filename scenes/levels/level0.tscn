@@ -59,9 +59,13 @@ texture_filter = 1
 
 [node name="Billiard Entrance" parent="SceneTriggers" unique_id=1479068614 instance=ExtResource("4_ry65h")]
 position = Vector2(352, 288)
-target_level_name = 0
-target_level_trigger = 0
-current_level_trigger = 1
+arrival_id = 1
+entry_direction = Vector2(0, 1)
+
+[node name="School" parent="SceneTriggers" unique_id=1383979598 instance=ExtResource("4_ry65h")]
+position = Vector2(896, 336)
+to_level = 2
+arrival_id = 2
 entry_direction = Vector2(0, 1)
 
 [node name="SpawnPoints" type="Node2D" parent="." unique_id=1884108535]
