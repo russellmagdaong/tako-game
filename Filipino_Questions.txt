@@ -1,0 +1,362 @@
+GRADE 7 MATHEMATICS
+EASY (Questions 1–7)
+Identification
+1. Evaluate:
+15 + (-9) = ________
+Sagot: 6
+2. Simplify ang fraction 18/30.
+Sagot: 3/5
+3. Isulat ang 0.6 bilang fraction in simplest form.
+Sagot: 3/5
+4. Hanapin ang x.
+x + 12 = 27
+Sagot: 15
+5. Alin sa mga sumusunod ang isang rational number?
+A. π
+B. √7
+C. -8/5
+D. √10
+Sagot: C
+6. Evaluate:
+-8 + 13
+A. -21
+B. -5
+C. 5
+D. 21
+Sagot: C
+7. Aling simbolo ang dapat ilagay para maging tama ang pahayag?
+-7 ____ -3
+A. >
+B. <
+C. =
+D. ≠
+Sagot: B
+8. Simplify:
+4(3 + x)
+Sagot: 12 + 4x
+9. Hanapin ang sagot sa 6².
+Sagot: 36
+10. Ang isang rectangle ay may haba na 11 cm at lapad na 5 cm. Hanapin ang perimeter.
+Sagot: 32 cm
+11. Aling expression ang nagpapakita ng "five less than twice a number"?
+A. 2x + 5
+B. 5 − 2x
+C. 2x − 5
+D. 5x − 2
+Sagot: C
+12. Solve:
+x − 8 = 19
+A. 9
+B. 11
+C. 27
+D. 28
+Sagot: C
+13. Ang presyo ng isang bag ay ₱450. May 10% discount ang customer. Magkano ang discount?
+A. ₱40
+B. ₱45
+C. ₱50
+D. ₱55
+Sagot: B
+14. Ano ang area ng isang square na may side na 12 cm?
+A. 48 cm²
+B. 96 cm²
+C. 144 cm²
+D. 288 cm²
+Sagot: C
+15. Ang ratio ng mga lalaki sa mga babae ay 4 : 5. Kung may 20 lalaki, ilan ang mga babae?
+Sagot: 25
+16. Evaluate:
+5² − 3² = ________
+Sagot: 16
+17. Kumita si Maria ng ₱1,500 noong Sabado at Linggo. Ginastos niya ang 35% nito. Magkano ang nagastos niya?
+A. ₱500
+B. ₱515
+C. ₱525
+D. ₱550
+Sagot: C
+18. Ang temperatura ay 9°C noong hapon. Pagsapit ng hatinggabi, bumaba ito ng 14°C. Ano ang naging temperatura?
+A. -23°C
+B. -5°C
+C. 5°C
+D. 23°C
+Sagot: B
+19. Alin sa mga sumusunod ang equivalent sa 3(a + 4)?
+A. a + 12
+B. 3a + 12
+C. 7a
+D. 12a
+Sagot: B
+20. Bumili ang isang paaralan ng 18 scientific calculators na nagkakahalaga ng ₱275 bawat isa. Nagbigay ang supplier ng 15% discount sa kabuuang halaga ng binili. Magkano ang binayaran ng paaralan?
+A. ₱4,207.50
+B. ₱4,500.00
+C. ₱4,950.00
+D. ₱5,225.00
+Sagot: A
+
+GRADE 8 MATHEMATICS
+
+1. Evaluate: 2⁵ = ________
+Sagot: 32
+2. Multiply: (3x)(4x)
+Sagot: 12x²
+3. Factor ang expression x² + 7x + 10.
+Sagot: (x + 5)(x + 2)
+4. Find the slope ng line na dumadaan sa (2, 3) at (4, 7).
+Sagot: 2
+5. Alin sa mga sumusunod ang isang binomial?
+A. x² + 3x
+B. x² + 2x + 1
+C. 5
+D. x³ + x² + x
+Sagot: A
+6. Simplify: x³ × x²
+A. x⁵
+B. x⁶
+C. x
+D. x²
+Sagot: A
+7. Alin sa mga sumusunod ang isang linear equation?
+A. x² = 16
+B. 3x + 5 = 17
+C. y = x²
+D. x³ = 8
+Sagot: B
+8. Solve for x. 3x + 6 = 21
+Sagot: 5
+9. Expand: (x + 4)(x + 2)
+Sagot: x² + 6x + 8
+10. Solve for y.
+2y − 8 = 10
+Sagot: 9
+11. Alin sa mga sumusunod ang factor ng x² − 16?
+A. (x + 8)
+B. (x − 4)
+C. (x + 16)
+D. (x − 8)
+Sagot: B
+12. Solve:
+5x = 45
+A. 8
+B. 9
+C. 10
+D. 11
+Sagot: B
+13. Ano ang y-intercept ng y = 3x + 4?
+A. 3
+B. 4
+C. 7
+D. -4
+Sagot: B
+14. Ang isang right triangle ay may legs na 6 cm at 8 cm. Ano ang length ng hypotenuse?
+A. 9 cm
+B. 10 cm
+C. 11 cm
+D. 12 cm
+Sagot: B
+15. Factor completely:
+x² − 9
+Sagot: (x + 3)(x − 3)
+16. Evaluate:
+4² + 3² = ________
+Sagot: 25
+17. Ang presyo ng isang cellphone ay ₱12,000. Ibinenta ito na may 15% discount. Magkano ang discounted price?
+A. ₱10,200
+B. ₱10,500
+C. ₱11,000
+D. ₱11,200
+Sagot: A
+18. Aling equation ang nagpapakita ng line na may slope na 2 at y-intercept na 5?
+A. y = 5x + 2
+B. y = 2x + 5
+C. y = 2x − 5
+D. y = x + 5
+Sagot: B
+19. Alin sa mga sumusunod ang solution set ng x² = 49?
+A. {7}
+B. {-7}
+C. {-7, 7}
+D. {49}
+Sagot: C
+20. Bumili ang isang paaralan ng 25 scientific calculators na nagkakahalaga ng ₱320 bawat isa. Nagbigay ang supplier ng 12% discount sa kabuuang halaga ng binili. Magkano ang binayaran ng paaralan?
+A. ₱7,040
+B. ₱7,200
+C. ₱7,680
+D. ₱8,000
+Sagot: A
+GRADE 9 MATHEMATICS
+1. Find the square root of 144.
+Sagot: 12
+2. Factor ang expression x² + 9x + 20.
+Sagot: (x + 4)(x + 5)
+3. Solve for x.
+x² = 64
+Sagot: ±8
+4. Find the value of the discriminant ng x² + 6x + 5.
+Sagot: 16
+5. Alin sa mga sumusunod ang isang quadratic equation?
+A. x + 5 = 12
+B. x² − 9 = 0
+C. y = 4x + 3
+D. x³ + 2 = 0
+Sagot: B
+6. Evaluate:
+√81 + 5
+A. 12
+B. 13
+C. 14
+D. 15
+Sagot: C
+7. Aling graph ang nagpapakita ng isang quadratic function?
+A. Isang straight line
+B. Isang parabola
+C. Isang circle
+D. Isang triangle
+Sagot: B
+8. Solve for x by factoring.
+x² − 25 = 0
+Sagot: x = 5 o x = -5
+9. Find the vertex ng graph y = x².
+Sagot: (0, 0)
+10. Find the axis of symmetry ng y = x² − 8x + 7.
+Sagot: x = 4
+11. Solve ang quadratic equation x² + 7x + 10 = 0.
+A. x = -2, -5
+B. x = 2, 5
+C. x = -10, -1
+D. x = 10, 1
+Sagot: A
+12. Aling method ang maaaring gamitin para i-solve ang x² + 5x + 6 = 0?
+A. Factoring
+B. Quadratic Formula
+C. Completing the Square
+D. All of the above
+Sagot: D
+13. Simplify:
+√75
+A. 5√3
+B. 15√3
+C. 25√3
+D. 3√5
+Sagot: A
+14. Ano ang value ng (−6)²?
+A. -36
+B. 12
+C. 36
+D. -12
+Sagot: C
+15. Find the midpoint ng mga points (2, 4) at (6, 10).
+Sagot: (4, 7)
+16. Find the distance between the points (1, 2) at (4, 6).
+Sagot: 5 units
+17. Ang isang rectangular garden ay may length na 4 meters na mas mahaba kaysa sa width nito. Kung ang area ay 60 m², ano ang width ng garden?
+A. 5 m
+B. 6 m
+C. 8 m
+D. 10 m
+Sagot: B
+18. Kung ang y varies directly as x at ang y = 24 kapag x = 6, ano ang value ng y kapag x = 10?
+A. 30
+B. 36
+C. 40
+D. 48
+Sagot: C
+19. Alin sa mga sumusunod ang walang real solution?
+A. x² − 16 = 0
+B. x² + 1 = 0
+C. x² − 9 = 0
+D. x² − 25 = 0
+Sagot: B
+20. Plano ng isang paaralan na gumawa ng rectangular garden. Ang length ay 5 meters na mas mahaba kaysa sa width, at ang kabuuang area ay 84 square meters. Ano ang dimensions ng garden?
+A. 7 m × 12 m
+B. 6 m × 14 m
+C. 8 m × 13 m
+D. 9 m × 14 m
+Sagot: A
+GRADE 10 MATHEMATICS
+1. Find the value of ________.
+Sagot: 1/2
+2. Find the value of ________.
+Sagot: 1/2
+3. Find the mean ng sumusunod na data: 8, 10, 12, 15, 15.
+Sagot: 12
+4. Find the probability of getting an even number when rolling a fair six-sided die.
+Sagot: 1/2
+5. Aling trigonometric ratio ang katumbas ng opposite ÷ hypotenuse?
+A. Cosine
+B. Tangent
+C. Sine
+D. Cotangent
+Sagot: C
+6. Alin sa mga sumusunod ang equation ng isang circle na may center sa origin at radius na 5?
+A. x² + y² = 10
+B. x² + y² = 25
+C. x + y = 25
+D. x² − y² = 25
+Sagot: B
+7. Aling measure of central tendency ang middle value ng isang ordered data set?
+A. Mean
+B. Median
+C. Mode
+D. Range
+Sagot: B
+8. Find the value of ________.
+Sagot: 1
+9. Find the median ng data set: 4, 6, 8, 10, 12.
+Sagot: 8
+10. Find the circumference ng isang circle na may radius na 7 cm. (Use ________)
+Sagot: 44 cm
+11. Ang isang bag ay may 5 red balls at 3 blue balls. Ano ang probability na makabunot ng blue ball?
+A. 3/5
+B. 3/8
+C. 5/8
+D. 1/2
+Sagot: B
+12. Ano ang value ng ________?
+A. 0
+B. 1
+C. 1/2
+D. √3/2
+Sagot: B
+13. Aling trigonometric ratio ang katumbas ng opposite ÷ adjacent?
+A. Sine
+B. Cosine
+C. Tangent
+D. Secant
+Sagot: C
+14. Ang isang right triangle ay may legs na 5 cm at 12 cm. Ano ang length ng hypotenuse?
+A. 11 cm
+B. 12 cm
+C. 13 cm
+D. 17 cm
+Sagot: C
+15. Find the mode ng data set: 6, 8, 8, 10, 12, 8, 15.
+Sagot: 8
+16. Find the range ng data set: 14, 18, 20, 24, 27.
+Sagot: 13
+17. Ang isang klase ay may 12 boys at 18 girls. Kung isang estudyante ang pipiliin nang random, ano ang probability na makapili ng isang girl?
+A. 2/5
+B. 3/5
+C. 3/10
+D. 2/3
+Sagot: B
+18. Ang isang ladder ay 10 meters ang haba at nakasandal sa isang pader. Ang paa ng ladder ay 6 meters ang layo mula sa pader. Gaano kataas ang naaabot ng ladder sa pader?
+A. 6 m
+B. 7 m
+C. 8 m
+D. 9 m
+Sagot: C
+19. Alin sa mga sumusunod ang katumbas ng ________?
+A. 0
+B. 1
+C. 2
+D. tan θ
+Sagot: B
+20. Ang isang kite ay lumilipad na nakakabit sa isang 50-meter na string. Ang angle of elevation mula sa lupa papunta sa kite ay 53°. Humigit-kumulang gaano kataas ang kite mula sa lupa? (Use ________)
+A. 30 m
+B. 35 m
+C. 40 m
+D. 45 m
+Sagot: C
+
+ 
+

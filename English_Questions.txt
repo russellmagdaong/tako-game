@@ -1,0 +1,359 @@
+GRADE 7 MATHEMATICS
+1. Evaluate: 15 + (-9) = ________
+Answer: 6
+2. Simplify the fraction 18/30.
+Answer: 3/5
+3. Convert 0.6 into a fraction in simplest form.
+Answer: 3/5
+4. Solve for x.
+x + 12 = 27
+Answer: 15
+5. Which of the following is a rational number?
+A. π
+B. √7
+C. -8/5
+D. √10
+Answer: C
+6. Evaluate: -8 + 13
+A. -21
+B. -5
+C. 5
+D. 21
+Answer: C
+7. Which symbol makes the statement true?
+-7 ____ -3
+A. >
+B. <
+C. =
+D. ≠
+Answer: B
+8. Simplify:
+4(3 + x)
+Answer: 12 + 4x
+9. Find the value of 6².
+Answer: 36
+10. A rectangle has a length of 11 cm and a width of 5 cm. Find its perimeter.
+Answer: 32 cm
+11. Which expression represents "five less than twice a number"?
+A. 2x + 5
+B. 5 − 2x
+C. 2x − 5
+D. 5x − 2
+Answer: C
+12. Solve:
+x − 8 = 19
+A. 9
+B. 11
+C. 27
+D. 28
+Answer: C
+13. A bag costs ₱450. A customer receives a 10% discount. How much is the discount?
+A. ₱40
+B. ₱45
+C. ₱50
+D. ₱55
+Answer: B
+14. What is the area of a square whose side is 12 cm?
+A. 48 cm²
+B. 96 cm²
+C. 144 cm²
+D. 288 cm²
+Answer: C
+15. The ratio of boys to girls is 4 : 5. If there are 20 boys, how many girls are there?
+Answer: 25
+16. Evaluate:
+5² − 3² = ________
+Answer: 16
+17. Maria earned ₱1,500 during the weekend. She spent 35% of it. How much money did she spend?
+A. ₱500
+B. ₱515
+C. ₱525
+D. ₱550
+Answer: C
+18. The temperature was 9°C in the afternoon. At midnight it dropped by 14°C. What was the temperature?
+A. -23°C
+B. -5°C
+C. 5°C
+D. 23°C
+Answer: B
+19. Which of the following is equivalent to 3(a + 4)?
+A. a + 12
+B. 3a + 12
+C. 7a
+D. 12a
+Answer: B
+20. A school purchased 18 scientific calculators costing ₱275 each. The supplier gave a 15% discount on the total purchase. How much did the school pay?
+A. ₱4,207.50
+B. ₱4,500.00
+C. ₱4,950.00
+D. ₱5,225.00
+Answer: A  
+GRADE 8 MATHEMATICS
+1. Evaluate: 2⁵ = ________
+Answer: 32
+2. Multiply: (3x)(4x)
+Answer: 12x²
+3. Factor the expression x² + 7x + 10.
+Answer: (x + 5)(x + 2)
+4. Find the slope of the line passing through (2, 3) and (4, 7).
+Answer: 2
+5. Which of the following is a binomial?
+A. x² + 3x
+B. x² + 2x + 1
+C. 5
+D. x³ + x² + x
+Answer: A
+6. Simplify: x³ × x²
+A. x⁵
+B. x⁶
+C. x
+D. x²
+Answer: A
+7. Which of the following is a linear equation?
+A. x² = 16
+B. 3x + 5 = 17
+C. y = x²
+D. x³ = 8
+Answer: B
+8. Solve for x.
+3x + 6 = 21
+Answer: 5
+9. Expand: (x + 4)(x + 2)
+Answer: x² + 6x + 8
+10. Solve for y.
+2y − 8 = 10
+Answer: 9
+11. Which is a factor of x² − 16?
+A. (x + 8)
+B. (x − 4)
+C. (x + 16)
+D. (x − 8)
+Answer: B
+12. Solve:
+5x = 45
+A. 8
+B. 9
+C. 10
+D. 11
+Answer: B
+13. What is the y-intercept of y = 3x + 4?
+A. 3
+B. 4
+C. 7
+D. -4
+Answer: B
+14. A right triangle has legs measuring 6 cm and 8 cm. What is the length of the hypotenuse?
+A. 9 cm
+B. 10 cm
+C. 11 cm
+D. 12 cm
+Answer: B
+15. Factor completely: x² − 9
+Answer: (x + 3)(x − 3)
+16. Evaluate: 4² + 3² = ________
+Answer: 25
+17. A cellphone costs ₱12,000. It is sold at a 15% discount. What is the discounted price?
+A. ₱10,200
+B. ₱10,500
+C. ₱11,000
+D. ₱11,200
+Answer: A
+18. Which equation represents a line with a slope of 2 and a y-intercept of 5?
+A. y = 5x + 2
+B. y = 2x + 5
+C. y = 2x − 5
+D. y = x + 5
+Answer: B
+19. Which of the following is the solution set of x² = 49?
+A. {7}
+B. {-7}
+C. {-7, 7}
+D. {49}
+Answer: C
+20. A school purchased 25 scientific calculators costing ₱320 each. The supplier gave a 12% discount on the total purchase. How much did the school pay?
+A. ₱7,040
+B. ₱7,200
+C. ₱7,680
+D. ₱8,000
+Answer: A
+ 
+ 
+ 
+GRADE 9 MATHEMATICS
+1. Find the square root of 144.
+Answer: 12
+2. Factor the expression x² + 9x + 20.
+Answer: (x + 4)(x + 5)
+3. Solve for x.
+x² = 64
+Answer: ±8
+4. Find the value of the discriminant of x² + 6x + 5.
+Answer: 16
+5. Which of the following is a quadratic equation?
+A. x + 5 = 12
+B. x² − 9 = 0
+C. y = 4x + 3
+D. x³ + 2 = 0
+Answer: B
+6. Evaluate: √81 + 5
+A. 12
+B. 13
+C. 14
+D. 15
+Answer: C
+7. Which graph represents a quadratic function?
+A. A straight line
+B. A parabola
+C. A circle
+D. A triangle
+Answer: B
+8. Solve for x by factoring.
+x² − 25 = 0
+Answer: x = 5 or x = -5
+9. Find the vertex of the graph y = x².
+Answer: (0, 0)
+10. Find the axis of symmetry of y = x² − 8x + 7.
+Answer: x = 4
+11. Solve the quadratic equation x² + 7x + 10 = 0.
+A. x = -2, -5
+B. x = 2, 5
+C. x = -10, -1
+D. x = 10, 1
+Answer: A
+12. Which method can be used to solve x² + 5x + 6 = 0?
+A. Factoring
+B. Quadratic Formula
+C. Completing the Square
+D. All of the above
+Answer: D
+13. Simplify: √75
+A. 5√3
+B. 15√3
+C. 25√3
+D. 3√5
+Answer: A
+14. What is the value of (−6)²?
+A. -36
+B. 12
+C. 36
+D. -12
+Answer: C
+15. Find the midpoint of the points (2, 4) and (6, 10).
+Answer: (4, 7)
+16. Find the distance between the points (1, 2) and (4, 6).
+Answer: 5 units
+17. A rectangular garden has a length that is 4 meters longer than its width. If the area is 60 m², what is the width?
+A. 5 m
+B. 6 m
+C. 8 m
+D. 10 m
+Answer: B
+18. If y varies directly as x and y = 24 when x = 6, what is y when x = 10?
+A. 30
+B. 36
+C. 40
+D. 48
+Answer: C
+19. Which of the following has no real solution?
+A. x² − 16 = 0
+B. x² + 1 = 0
+C. x² − 9 = 0
+D. x² − 25 = 0
+Answer: B
+20. A school plans to build a rectangular garden. The length is 5 meters longer than the width, and the total area is 84 square meters. What are the dimensions of the garden?
+A. 7 m × 12 m
+B. 6 m × 14 m
+C. 8 m × 13 m
+D. 9 m × 14 m
+Answer: A
+ 
+ 
+ 
+ 
+GRADE 10 MATHEMATICS
+1. Find the value of .
+Answer: 1/2
+2. Find the value of .
+Answer: 1/2
+3. Find the mean of the following data: 8, 10, 12, 15, 15.
+Answer: 12
+4. Find the probability of getting an even number when rolling a fair six-sided die.
+Answer: 1/2
+5. Which trigonometric ratio is equal to opposite ÷ hypotenuse?
+A. Cosine
+B. Tangent
+C. Sine
+D. Cotangent
+Answer: C
+6. Which of the following is the equation of a circle centered at the origin with a radius of 5?
+A. x² + y² = 10
+B. x² + y² = 25
+C. x + y = 25
+D. x² − y² = 25
+Answer: B
+7. Which measure of central tendency is the middle value of an ordered data set?
+A. Mean
+B. Median
+C. Mode
+D. Range
+Answer: B
+8. Find the value of .
+Answer: 1
+9. Find the median of the data set: 4, 6, 8, 10, 12.
+Answer: 8
+10. Find the circumference of a circle with a radius of 7 cm. (Use )
+Answer: 44 cm
+11. A bag contains 5 red balls and 3 blue balls. What is the probability of drawing a blue ball?
+A. 3/5
+B. 3/8
+C. 5/8
+D. 1/2
+Answer: B
+12. What is the value of ?
+A. 0
+B. 1
+C. 1/2
+D. √3/2
+Answer: B
+13. Which trigonometric ratio is equal to opposite ÷ adjacent?
+A. Sine
+B. Cosine
+C. Tangent
+D. Secant
+Answer: C
+14. A right triangle has legs measuring 5 cm and 12 cm. What is the length of the hypotenuse?
+A. 11 cm
+B. 12 cm
+C. 13 cm
+D. 17 cm
+Answer: C
+15. Find the mode of the data set: 6, 8, 8, 10, 12, 8, 15.
+Answer: 8
+16. Find the range of the data set: 14, 18, 20, 24, 27.
+Answer: 13
+17. A class has 12 boys and 18 girls. If one student is selected at random, what is the probability of selecting a girl?
+A. 2/5
+B. 3/5
+C. 3/10
+D. 2/3
+Answer: B
+18. A ladder is 10 meters long and leans against a wall. The foot of the ladder is 6 meters from the wall. How high up the wall does the ladder reach?
+A. 6 m
+B. 7 m
+C. 8 m
+D. 9 m
+Answer: C
+19. Which of the following is equal to ?
+A. 0
+B. 1
+C. 2
+D. tan θ
+Answer: B
+20. A kite is flying at the end of a 50-meter string. The angle of elevation from the ground to the kite is 53°. Approximately how high is the kite above the ground? (Use )
+A. 30 m
+B. 35 m
+C. 40 m
+D. 45 m
+Answer: C
+ 
+
