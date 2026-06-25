@@ -8,7 +8,7 @@ TAKO is a mobile-first, offline-first math RPG built in Godot 4 (GDScript) for A
 
 Walking through the Math door leads to a hallway with **Grade 7, 8, 9, and 10 choices**, all open from the start — progression is **not gated**, so players can enter any grade in any order and switch freely between them.
 
-Inside a grade's hall, the player encounters "enemies" — each one is a math question scoped to that grade's skill domain. Answering correctly fills a **progression bar** specific to that grade. Answering incorrectly isn't a fail state — the **AI companion explains exactly what went wrong and walks through the correct reasoning**, in whatever language the student is typing in (English, Filipino, or Taglish). Players can **backtrack** past a hard question and return to it later. Reaching 100% in a grade hall unlocks the option to move to another grade/subject or replay questions for review.
+Inside a grade's hall, the player encounters "enemies" — each one is a math question scoped to that grade's skill domain. Answering correctly fills a **progression bar** specific to that grade. Answering incorrectly isn't a fail state — the **AI companion explains exactly what went wrong and walks through the correct reasoning**, in whatever language the student is typing in (English or Filipino). Players can **backtrack** past a hard question and return to it later. Reaching 100% in a grade hall unlocks the option to move to another grade/subject or replay questions for review.
 
 The game is built to be genuinely playable with **zero internet connection** — Android's on-device **Gemini Nano** keeps AI feedback running offline — while syncing progress to the cloud whenever a connection is available.
 
@@ -32,19 +32,15 @@ TAKO deliberately separates **what the AI is trusted to do** from **what stays d
 UI text (menus, buttons, labels) is **hardcoded** in English/Tagalog string tables with a manual toggle — no AI involved in UI localization, since that content is static and finite.
 
 ---
-
 ## Features
-
 - **Story-driven intro** — billiard hall → school → subject doors → grade hallway, establishing both narrative hook and scalable subject/grade structure
-- **AI-personalized misconception feedback** — wrong answers trigger a targeted explanation of the *specific* mistake made, not a generic "wrong, try again," generated in the player's language (English/Filipino/Taglish)
+- **AI-personalized misconception feedback** — wrong answers trigger a targeted explanation of the *specific* mistake made, not a generic "wrong, try again," generated in the player's language (English/Filipino)
 - **Fully offline-first** — local save (SQLite) is the source of truth during play; Gemini Nano provides AI feedback with no internet required; progress syncs to Supabase only when a connection is available
 - **Ungated grade progression** — Grade 7, 8, 9, 10 halls are all open from the start; each tracks its own independent progression %
 - **Backtracking** — players can skip a difficult question and return to it later within a grade hall
 - **Subject scalability (visible, not yet built)** — Science, Languages, and Philippine History doors are present but locked, signaling future expansion
-- **Bilingual companion** — mirrors however the student types (English/Filipino) rather than offering a generic language toggle for AI content
-- **Login + cross-device sync** — Supabase Auth + Postgres backs up progress so it's available across devices
+- **Bilingual companion** — mirrors however the student types (English/Filipino) 
 - **Touch controls** — virtual joystick and interact button auto-shown on Android
-
 ---
 
 ## Setup Instructions
