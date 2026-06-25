@@ -26,7 +26,7 @@ TAKO deliberately separates **what the AI is trusted to do** from **what stays d
 | **Companion banter / encouragement / milestone reactions** | Mostly scripted/templated dialogue; AI-flavored only where low-stakes | Keeps the companion feeling alive without unnecessary AI calls |
 
 **Two-tier explanation generation:**
-- **Online:** Claude/GPT API generates richer, more natural explanations, mirroring the player's language (English/Filipino/Taglish) directly — no separate translation step.
+- **Online:** Claude/GPT API generates richer, more natural explanations, mirroring the player's language (English/Filipino) directly — no separate translation step.
 - **Offline:** On-device **Gemini Nano** (via Android ML Kit GenAI / AICore) generates the same explanation from the same pre-determined facts, so the game stays genuinely AI-powered with zero connection — not just AI-when-convenient.
 
 UI text (menus, buttons, labels) is **hardcoded** in English/Tagalog string tables with a manual toggle — no AI involved in UI localization, since that content is static and finite.
@@ -41,9 +41,9 @@ UI text (menus, buttons, labels) is **hardcoded** in English/Tagalog string tabl
 - **Ungated grade progression** — Grade 7, 8, 9, 10 halls are all open from the start; each tracks its own independent progression %
 - **Backtracking** — players can skip a difficult question and return to it later within a grade hall
 - **Subject scalability (visible, not yet built)** — Science, Languages, and Philippine History doors are present but locked, signaling future expansion
-- **Bilingual companion** — mirrors however the student types (English, Filipino, or Taglish) rather than offering a generic language toggle for AI content
+- **Bilingual companion** — mirrors however the student types (English/Filipino) rather than offering a generic language toggle for AI content
 - **Login + cross-device sync** — Supabase Auth + Postgres backs up progress so it's available across devices
-- **Touch controls** — virtual joystick and interact button auto-shown on Android; WASD + keyboard on desktop
+- **Touch controls** — virtual joystick and interact button auto-shown on Android
 
 ---
 
@@ -51,25 +51,10 @@ UI text (menus, buttons, labels) is **hardcoded** in English/Tagalog string tabl
 
 ### Prerequisites
 
-- [Godot 4.6](https://godotengine.org/download)
 - Android SDK + export templates
 - An Android device running Android 10+ for Gemini Nano on-device AI (availability depends on supported Pixel/Samsung devices)
 - A [Supabase](https://supabase.com) project (Postgres + Auth) for cloud sync
 - An API key for Claude or GPT (online explanation generation)
-
-### Running on desktop (development)
-
-Gemini Nano is Android-only and has no desktop equivalent. For desktop development, the online AI path (Claude/GPT API) is used instead, since it only requires an internet connection, not a specific device:
-
-1. Clone the repository
-   ```bash
-   git clone https://github.com/russellmagdaong/tako-game.git
-   ```
-2. Open `project.godot` in Godot 4.6
-3. Set your Claude/GPT API key in the project's environment/config (see `scripts/core/ApiClient.gd`)
-4. Press **Run (F5)**
-
-> Note: the offline/Gemini Nano explanation path can only be tested on a real supported Android device — there is no local stand-in for it during desktop development.
 
 ### Android build (production)
 
@@ -99,14 +84,14 @@ Open the in-game menu → **Settings** → **Clear Save Data** (tap twice to con
 
 ---
 
-## Team Members and Rules
+## Team Members and Roles
 
 **Team Name:** Billiard Boys
 
 | Name | Role |
 |---|---|
 | Balajadia, Vin Tristan E. | Database Administrator |
-| Gilo, Eric Jonhson H. | AI.... basta AI |
+| Gilo, Eric Jonhson H. | All-around Helper |
 | Guillermo, Christian P. | UI/UX Designer |
 | Magdaong, Russell D. | Game Developer |
 
