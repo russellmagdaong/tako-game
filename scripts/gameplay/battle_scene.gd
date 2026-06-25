@@ -41,9 +41,9 @@ func _ready() -> void:
 
 	_build_calc_pad()
 
-	set_problem_text("Generating question...")
+	set_problem_text("Generating question..." if Globals.preferred_language == "en" else "Bumubuo ng tanong...")
 	_set_output_text("")
-	ApiClient.generate_question(_skill_type)
+	ApiClient.generate_question(_skill_type, Globals.preferred_language)
 
 	call_deferred("_maybe_show_battle_tutorial")
 
@@ -88,20 +88,42 @@ func _submit_answer() -> void:
 		return
 	var player_answer := _answer_input.text.strip_edges()
 	if player_answer.is_empty():
-		_set_output_text("Type your answer first.")
+		_set_output_text("Type your answer first." if Globals.preferred_language == "en" else "I-type muna ang iyong sagot.")
 		return
 
 	_attempt_count += 1
 	_submit_btn.disabled = true
 
-	if _is_correct_answer(player_answer, _expected_answer):
-		_set_output_text("Correct!")
+	var check_result := MathManager.verify_player_answer(player_answer)
+	if check_result["is_correct"]:
+		_set_output_text("Correct!" if Globals.preferred_language == "en" else "Tama!")
+		if DatabaseManager.is_initialized and not PlayerDataManager.user_id.is_empty():
+			var enemy = SceneManager.battle_enemy
+			var enemy_id = enemy.enemy_id if enemy != null else "enemy"
+			DatabaseManager.add_question_attempt(PlayerDataManager.user_id, "math", MathManager.active_template.grade, enemy_id, true)
 		await get_tree().create_timer(2.0).timeout
 		SceneManager.end_battle()
 	else:
 		_awaiting_ai = true
-		_set_output_text("Checking...")
-		ApiClient.generate_feedback(_current_question, _expected_answer, player_answer)
+		_set_output_text("Checking..." if Globals.preferred_language == "en" else "Sinusuri...")
+		if DatabaseManager.is_initialized and not PlayerDataManager.user_id.is_empty():
+			var enemy = SceneManager.battle_enemy
+			var enemy_id = enemy.enemy_id if enemy != null else "enemy"
+			DatabaseManager.add_question_attempt(
+				PlayerDataManager.user_id,
+				"math",
+				MathManager.active_template.grade,
+				enemy_id,
+				false,
+				check_result["misconception"]
+			)
+		ApiClient.generate_feedback(
+			_current_question,
+			MathManager.active_expected_answer,
+			player_answer,
+			check_result["misconception"],
+			Globals.preferred_language
+		)
 
 func _is_correct_answer(player: String, expected: String) -> bool:
 	if player.strip_edges().to_lower() == expected.strip_edges().to_lower():
@@ -128,9 +150,13 @@ func _on_question_generated(data: Dictionary) -> void:
 	var question: String = data.get("question", "")
 	var answer: String   = data.get("answer",   "")
 
-	if question.is_empty() or answer.is_empty():
-		set_problem_text("(Could not generate question — is Ollama running?)")
-		_set_output_text("Make sure Ollama is installed and running locally.")
+	if question.is_empty():
+		if Globals.preferred_language == "tl":
+			set_problem_text("(Hindi makabuo ng tanong — tumatakbo ba ang Ollama?)")
+			_set_output_text("Siguraduhing naka-install at tumatakbo ang Ollama.")
+		else:
+			set_problem_text("(Could not generate question — is Ollama running?)")
+			_set_output_text("Make sure Ollama is installed and running locally.")
 		return
 
 	_current_question = question
