@@ -1,28 +1,52 @@
 extends Node
 # Autoload: ApiClient
 #
-# Communicates with a local Ollama instance to generate math questions and feedback.
-# Requires Ollama running at http://localhost:11434 with a compatible model installed.
-# Change `model` to whichever model you have (e.g. "llama3.2", "phi3", "gemma3").
+# Coordinates AI requests for math question phrasing and encouraging feedback.
+# Supports Ollama (local test-only), Google Gemini 1.5 Flash (online REST API),
+# and Google Gemini Nano (offline on-device Android AICore).
+#
+# NOTE: The Ollama mode is strictly for local desktop testing and developer validation.
+# It is completely bypassed in exported Android SDK builds in favor of Gemini Nano/Flash.
+
+enum AiProvider {
+	OLLAMA,
+	GEMINI_1_5_FLASH,
+	GEMINI_NANO
+}
 
 signal question_generated(data: Dictionary)
 signal feedback_generated(data: Dictionary)
 signal request_failed(tag: String, http_code: int)
 
 const OLLAMA_URL := "http://localhost:11434"
-var model: String = "gemma3"
+
+@export var active_provider: AiProvider = AiProvider.OLLAMA
+@export var gemini_api_key: String = ""
+@export var gemini_nano_plugin_name: String = "GodotGeminiNano"
+@export var ollama_model: String = "gemma3"
 
 var _http: HTTPRequest
 var _queue: Array[Dictionary] = []
 var _busy: bool = false
 var _current_tag: String = ""
+var _nano_plugin: Object = null
 
 func _ready() -> void:
 	_http = HTTPRequest.new()
 	_http.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_http)
 	_http.request_completed.connect(_on_request_completed)
-	GameLogger.info("AiClient ready — model: %s  url: %s" % [model, OLLAMA_URL])
+	
+	# Detect and initialize the Android Gemini Nano JNI plugin
+	if Engine.has_singleton(gemini_nano_plugin_name):
+		_nano_plugin = Engine.get_singleton(gemini_nano_plugin_name)
+		if _nano_plugin.has_signal("content_generated"):
+			_nano_plugin.connect("content_generated", _on_nano_content_generated)
+		if _nano_plugin.has_signal("generation_failed"):
+			_nano_plugin.connect("generation_failed", _on_nano_generation_failed)
+		GameLogger.info("ApiClient: Gemini Nano Android plugin singleton detected and connected.")
+		
+	GameLogger.info("AiClient ready — active provider: %s" % AiProvider.keys()[active_provider])
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -46,7 +70,7 @@ func generate_question(skill_type: String, lang: String = "en") -> void:
 		+ "Return ONLY valid JSON with exactly these two fields:\n"
 		+ "{\"question\": \"the creative question text\", \"hint\": \"a helpful hint to guide them\"}"
 	)
-	_enqueue({"model": model, "prompt": prompt, "stream": false, "format": "json"}, "question_generate")
+	_enqueue(prompt, "question_generate")
 
 func generate_feedback(question: String, expected: String, player_answer: String, misconception: String = "", lang: String = "en") -> void:
 	var lang_instruction := "Write the feedback strictly in English."
@@ -67,14 +91,14 @@ func generate_feedback(question: String, expected: String, player_answer: String
 		+ lang_instruction + "\n"
 		+ "Return ONLY valid JSON: {\"feedback\": \"your message here\"}"
 	)
-	_enqueue({"model": model, "prompt": prompt, "stream": false, "format": "json"}, "feedback_generate")
+	_enqueue(prompt, "feedback_generate")
 
 # ---------------------------------------------------------------------------
 # Queue
 # ---------------------------------------------------------------------------
 
-func _enqueue(payload: Dictionary, tag: String) -> void:
-	_queue.append({"payload": payload, "tag": tag})
+func _enqueue(prompt: String, tag: String) -> void:
+	_queue.append({"prompt": prompt, "tag": tag})
 	if not _busy:
 		_flush()
 
@@ -85,14 +109,57 @@ func _flush() -> void:
 	_busy = true
 	var req: Dictionary = _queue.pop_front()
 	_current_tag = req.tag
-	var body := JSON.stringify(req.payload)
-	var headers: PackedStringArray = ["Content-Type: application/json"]
-	var err := _http.request(OLLAMA_URL + "/api/generate", headers, HTTPClient.METHOD_POST, body)
-	if err != OK:
-		GameLogger.error("AiClient: request error %d for [%s]" % [err, req.tag])
-		request_failed.emit(_current_tag, err)
-		_busy = false
-		_flush()
+	var prompt: String = req.prompt
+	
+	match active_provider:
+		AiProvider.OLLAMA:
+			var payload := {
+				"model": ollama_model,
+				"prompt": prompt,
+				"stream": false,
+				"format": "json"
+			}
+			var body := JSON.stringify(payload)
+			var headers: PackedStringArray = ["Content-Type: application/json"]
+			var err := _http.request(OLLAMA_URL + "/api/generate", headers, HTTPClient.METHOD_POST, body)
+			if err != OK:
+				_handle_request_error(err)
+				
+		AiProvider.GEMINI_1_5_FLASH:
+			if gemini_api_key.is_empty():
+				GameLogger.error("AiClient: Gemini API Key is missing!")
+				_handle_request_error(ERR_UNCONFIGURED)
+				return
+				
+			var url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + gemini_api_key
+			var payload := {
+				"contents": [{
+					"parts": [{"text": prompt}]
+				}],
+				"generationConfig": {
+					"responseMimeType": "application/json"
+				}
+			}
+			var body := JSON.stringify(payload)
+			var headers: PackedStringArray = ["Content-Type: application/json"]
+			var err := _http.request(url, headers, HTTPClient.METHOD_POST, body)
+			if err != OK:
+				_handle_request_error(err)
+				
+		AiProvider.GEMINI_NANO:
+			if _nano_plugin == null:
+				GameLogger.error("AiClient: Gemini Nano plugin is not available on this platform!")
+				_handle_request_error(ERR_UNAVAILABLE)
+				return
+				
+			# Trigger the native Android AICore JNI generator asynchronously
+			_nano_plugin.call("generate_content", prompt)
+
+func _handle_request_error(err: int) -> void:
+	GameLogger.error("AiClient: request error %d for [%s]" % [err, _current_tag])
+	request_failed.emit(_current_tag, err)
+	_busy = false
+	_flush()
 
 func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var tag := _current_tag
@@ -113,12 +180,30 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 		_flush()
 		return
 
-	# Ollama wraps the model output as a string in the "response" field.
-	var response_text: String = (outer.data as Dictionary).get("response", "")
+	var outer_dict: Dictionary = outer.data
+	var response_text := ""
+	
+	match active_provider:
+		AiProvider.OLLAMA:
+			response_text = outer_dict.get("response", "")
+		AiProvider.GEMINI_1_5_FLASH:
+			var candidates = outer_dict.get("candidates", [])
+			if not candidates.is_empty() and candidates[0] is Dictionary:
+				var content = candidates[0].get("content", {})
+				if content is Dictionary:
+					var parts = content.get("parts", [])
+					if not parts.is_empty() and parts[0] is Dictionary:
+						response_text = parts[0].get("text", "")
+
 	var inner := JSON.new()
 	var data: Dictionary = {}
 	if inner.parse(response_text) == OK and inner.data is Dictionary:
 		data = inner.data
+	else:
+		GameLogger.error("AiClient: inner JSON parse failed for tag=%s. Raw text: %s" % [tag, response_text])
+		request_failed.emit(tag, -1)
+		_flush()
+		return
 
 	GameLogger.info("AiClient: response tag=%s" % tag)
 	match tag:
@@ -127,4 +212,40 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 		"feedback_generate":
 			feedback_generated.emit(data)
 
+	_flush()
+
+# ---------------------------------------------------------------------------
+# Android Native Gemini Nano JNI Callbacks
+# ---------------------------------------------------------------------------
+
+func _on_nano_content_generated(response_text: String) -> void:
+	var tag := _current_tag
+	_current_tag = ""
+	_busy = false
+	
+	var inner := JSON.new()
+	var data: Dictionary = {}
+	if inner.parse(response_text) == OK and inner.data is Dictionary:
+		data = inner.data
+	else:
+		GameLogger.error("AiClient (Nano): inner JSON parse failed for tag=%s. Raw: %s" % [tag, response_text])
+		request_failed.emit(tag, -1)
+		_flush()
+		return
+		
+	GameLogger.info("AiClient (Nano): response tag=%s" % tag)
+	match tag:
+		"question_generate":
+			question_generated.emit(data)
+		"feedback_generate":
+			feedback_generated.emit(data)
+			
+	_flush()
+
+func _on_nano_generation_failed(error_message: String) -> void:
+	var tag := _current_tag
+	_current_tag = ""
+	_busy = false
+	GameLogger.error("AiClient (Nano) Error: %s for tag=%s" % [error_message, tag])
+	request_failed.emit(tag, -2)
 	_flush()
