@@ -278,23 +278,19 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/normal = SubResource("StyleBoxEmpty_kholq")
-text = "Code Editor"
+text = "Your Answer"
 
 [node name="HintButton" parent="MarginContainer/ContentSplit/RightVBox/EditorPanel/EditorMargin/EditorVBox/TitleRow" unique_id=325701175 instance=ExtResource("7_mhrs4")]
 layout_mode = 2
 
-[node name="CodeEditor" type="CodeEdit" parent="MarginContainer/ContentSplit/RightVBox/EditorPanel/EditorMargin/EditorVBox" unique_id=200000018]
+[node name="AnswerInput" type="LineEdit" parent="MarginContainer/ContentSplit/RightVBox/EditorPanel/EditorMargin/EditorVBox" unique_id=200000018]
 unique_name_in_owner = true
-z_index = 2
 layout_mode = 2
-size_flags_vertical = 3
-theme = SubResource("Theme_651df")
 theme_override_fonts/font = ExtResource("6_kholq")
+theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_drxpv")
 theme_override_styles/focus = ExtResource("5_i4ha3")
-placeholder_text = "-- Write your code here..."
-gutters_draw_line_numbers = true
-indent_automatic = true
+placeholder_text = "Type your answer here..."
 
 [node name="BottomRow" type="HBoxContainer" parent="MarginContainer/ContentSplit/RightVBox/EditorPanel/EditorMargin/EditorVBox" unique_id=200000043]
 layout_mode = 2

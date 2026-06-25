@@ -15,6 +15,7 @@ var is_dev_boot: bool = false
 var dev_boot_level: int = Enums.LevelName.Level0
 var _pause_menu: Node
 var _settings_layer: CanvasLayer
+var _virtual_controls: Node
 var _js_save_cb: JavaScriptObject
 
 func _ready() -> void:
@@ -66,8 +67,8 @@ func _on_game_start_requested(character: String) -> void:
 		main_menu_layer.queue_free()
 
 	Globals.selected_character = character
-	if OS.has_feature("web"):
-		JavaScriptBridge.eval("localStorage.setItem('odin_character','%s');" % character)
+
+	_add_virtual_controls()
 
 	var target_level: int = Enums.LevelName.Level0
 	if not PlayerDataManager.last_level_name.is_empty():
@@ -131,6 +132,15 @@ func add_player(new_player: Node) -> Node:
 		get_game_view_port().add_child(new_player)
 	set_player(new_player)
 	return get_player()
+
+func _add_virtual_controls() -> void:
+	if _virtual_controls != null:
+		return
+	var vc_layer := CanvasLayer.new()
+	vc_layer.name = "VirtualControls"
+	vc_layer.set_script(load("res://scripts/ui/virtual_controls.gd"))
+	_target().add_child(vc_layer)
+	_virtual_controls = vc_layer
 
 func _create_settings_button() -> void:
 	_settings_layer = CanvasLayer.new()

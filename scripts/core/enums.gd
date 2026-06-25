@@ -51,10 +51,10 @@ enum FacingDirection {
 }
 
 enum SkillType {
-	ArrayInitialization,
-	ArrayAccess,
-	ArrayIteration,
-	ArrayOperations,
-	MultidimensionalArrays,
-	JaggedArrays,
+	BasicArithmetic,
+	Fractions,
+	Algebra,
+	Geometry,
+	WordProblems,
+	Statistics,
 }
