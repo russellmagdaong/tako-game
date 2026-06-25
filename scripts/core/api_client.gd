@@ -32,6 +32,7 @@ var _current_tag: String = ""
 var _nano_plugin: Object = null
 
 func _ready() -> void:
+	_load_env_file()
 	_http = HTTPRequest.new()
 	_http.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_http)
@@ -47,6 +48,27 @@ func _ready() -> void:
 		GameLogger.info("ApiClient: Gemini Nano Android plugin singleton detected and connected.")
 		
 	GameLogger.info("AiClient ready — active provider: %s" % AiProvider.keys()[active_provider])
+
+func _load_env_file() -> void:
+	var path := "res://.env"
+	if not FileAccess.file_exists(path):
+		return
+		
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return
+		
+	while not file.eof_reached():
+		var line := file.get_line().strip_edges()
+		if line.begins_with("GEMINI_API_KEY"):
+			var parts := line.split("=", true, 1)
+			if parts.size() > 1:
+				var value := parts[1].strip_edges()
+				# Remove potential outer quotes
+				if (value.begins_with('"') and value.ends_with('"')) or (value.begins_with("'") and value.ends_with("'")):
+					value = value.substr(1, value.length() - 2)
+				gemini_api_key = value
+				break
 
 # ---------------------------------------------------------------------------
 # Public API
