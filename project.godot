@@ -27,6 +27,7 @@ PlayerDataManager="*res://scripts/core/player_data_manager.gd"
 AudioManager="*res://scripts/core/audio_manager.gd"
 ApiClient="*res://scripts/core/api_client.gd"
 DatabaseManager="*res://scripts/SQLite/db_manager.gd"
+SupabaseSyncManager="*res://scripts/core/supabase_sync_manager.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]
