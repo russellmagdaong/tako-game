@@ -15,7 +15,7 @@ func enter_state() -> void:
 		enemy_input.direction = enemy.vision_direction
 		enemy_input.idle.emit()
 
-	if enemy == null or enemy.is_final_boss:
+	if enemy == null or enemy.is_final_boss or enemy.is_defeated:
 		return
 
 	_vision_ray = state_owner.get_node_or_null("VisionRay")
@@ -35,6 +35,10 @@ func _process(_delta: float) -> void:
 
 	var enemy: Enemy = state_owner as Enemy
 	if enemy == null:
+		return
+
+	if enemy.is_defeated:
+		_check_interact_rebattle(enemy)
 		return
 
 	if enemy.is_final_boss:
@@ -71,6 +75,19 @@ func _process(_delta: float) -> void:
 	if _vision_ray.is_colliding() and _vision_ray.get_collider() is Player:
 		AudioManager.play_music("battle")
 		enemy.state_machine.change_state("Alert")
+
+func _check_interact_rebattle(enemy: Enemy) -> void:
+	var player: Node = GameManager.get_player()
+	if player == null:
+		return
+	var diff: Vector2 = enemy.global_position - player.global_position
+	if absf(diff.x) + absf(diff.y) > Globals.grid_size + 1.0:
+		return
+	var player_movement: CharacterMovement = player.get_node_or_null("Movement")
+	if player_movement != null and player_movement.is_moving():
+		return
+	if Input.is_action_just_pressed("interact"):
+		SceneManager.start_battle(enemy)
 
 func _trigger_final_boss_battle(enemy: Enemy) -> void:
 	if Globals.final_boss_defeated:

@@ -54,6 +54,24 @@ func _ready() -> void:
 
 	call_deferred("_maybe_show_battle_tutorial")
 
+	if OS.is_debug_build():
+		_add_debug_skip_button()
+
+func _add_debug_skip_button() -> void:
+	var btn := Button.new()
+	btn.text = "[DEBUG] Skip"
+	btn.anchor_right = 1.0
+	btn.anchor_left = 1.0
+	btn.anchor_bottom = 1.0
+	btn.anchor_top = 1.0
+	btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	btn.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	btn.offset_left = -160.0
+	btn.offset_top = -60.0
+	btn.modulate = Color(1, 0.4, 0.4)
+	btn.pressed.connect(func(): SceneManager.end_battle())
+	add_child(btn)
+
 func _exit_tree() -> void:
 	if ApiClient.question_generated.is_connected(_on_question_generated):
 		ApiClient.question_generated.disconnect(_on_question_generated)
@@ -232,12 +250,7 @@ func _setup_sprites() -> void:
 		enemy_display.custom_minimum_size = Vector2(0, ENEMY_SPRITE_HEIGHT)
 	enemy_display.texture = _load_battle_texture("player", character)
 	var bg = get_node("%BattleBG")
-	if enemy != null and is_final_boss:
-		bg.texture = _load_battle_texture("bg", "boss")
-	else:
-		var enemy_id: String = enemy.enemy_id if enemy != null else ""
-		var bg_tex := _load_battle_texture("bg", enemy_id)
-		bg.texture = bg_tex if bg_tex != null else _load_battle_texture("bg", "default")
+	bg.texture = _load_battle_texture("bg", "11")
 	if enemy != null:
 		if is_final_boss:
 			var boss_char = "playerf" if character == "playerm" else "playerm"

@@ -27,11 +27,11 @@ var vision_direction: Vector2 = Vector2.DOWN
 @export var player_f_boss_frames: SpriteFrames
 
 var state_machine: StateMachine
+var is_defeated: bool = false
+var _initial_position: Vector2
 
 func _ready() -> void:
-	if enemy_id != "" and Globals.defeated_enemies.has(enemy_id):
-		queue_free()
-		return
+	_initial_position = position
 
 	match initial_facing:
 		Enums.FacingDirection.Up:
@@ -51,6 +51,19 @@ func _ready() -> void:
 		_apply_boss_sprites()
 
 	state_machine.change_state("Idle")
+
+	if enemy_id != "" and Globals.defeated_enemies.has(enemy_id):
+		set_defeated()
+
+func set_defeated() -> void:
+	is_defeated = true
+	modulate = Color(0.6, 0.6, 0.6, 1.0)
+	position = _initial_position
+	var vision_ray := get_node_or_null("VisionRay") as RayCast2D
+	if vision_ray != null:
+		vision_ray.enabled = false
+	if state_machine != null:
+		state_machine.change_state("Idle")
 
 func _apply_boss_sprites() -> void:
 	# Intentionally swapped: female boss frames shown for male player and vice versa.
