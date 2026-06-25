@@ -1,14 +1,12 @@
 extends Control
 
 var _answer_input: LineEdit
-var _output_text: Label
+var _status_label: Label
 var _submit_btn: Button
-var _hints_popup: Panel
-var _unlocked_hints: Array[String] = []
+var _calc_overlay: Control
 
 var _current_question: String = ""
 var _expected_answer: String = ""
-var _current_hint: String = ""
 var _attempt_count: int = 0
 var _skill_type: String = ""
 var _awaiting_ai: bool = false
@@ -22,24 +20,17 @@ func _ready() -> void:
 		theme = Globals.instance.ui_theme
 
 	_answer_input = get_node("%AnswerInput")
-	_output_text  = get_node("%OutputText")
+	_status_label = get_node("%StatusLabel")
 	_submit_btn   = get_node("%SubmitButton")
+
+	_calc_overlay = get_node("%CalcOverlay")
+	get_node("%CalcToggle").pressed.connect(_on_calc_toggle_pressed)
 
 	_submit_btn.disabled = true
 	_submit_btn.pressed.connect(_on_submit_pressed)
 	_answer_input.text_submitted.connect(_on_answer_submitted)
 
-	var hint_btn = _answer_input.get_parent().get_node("TitleRow/HintButton")
-	if hint_btn:
-		hint_btn.hint_requested.connect(_on_hint_pressed)
-
-	_hints_popup = get_node("HintsPopup")
-	_hints_popup.close_requested.connect(_on_hints_popup_close_requested)
-	_hints_popup.request_hint_requested.connect(_on_request_hint_requested)
-	_hints_popup.hide()
-
 	_setup_sprites()
-	call_deferred("_apply_zoom")
 
 	var enemy = SceneManager.battle_enemy
 	_skill_type = _skill_name(enemy.get("skill_type") if enemy != null else 0)
@@ -47,6 +38,8 @@ func _ready() -> void:
 	ApiClient.question_generated.connect(_on_question_generated)
 	ApiClient.feedback_generated.connect(_on_feedback_generated)
 	ApiClient.request_failed.connect(_on_request_failed)
+
+	_build_calc_pad()
 
 	set_problem_text("Generating question...")
 	_set_output_text("")
@@ -120,33 +113,12 @@ func _is_correct_answer(player: String, expected: String) -> bool:
 	return false
 
 # ---------------------------------------------------------------------------
-# Hint handling
+# Calculator overlay
 # ---------------------------------------------------------------------------
 
-func _on_hint_pressed() -> void:
-	if _hints_popup.visible:
-		_hints_popup.hide()
-		return
-	if _unlocked_hints.is_empty() and not _current_hint.is_empty():
-		_hints_popup.clear_hints()
-		_unlocked_hints.append(_current_hint)
-		_hints_popup.add_hint(_current_hint)
-	elif _unlocked_hints.is_empty():
-		_hints_popup.show_no_hints_message()
-	_hints_popup.show()
-
-func _on_hints_popup_close_requested() -> void:
-	_hints_popup.hide()
-
-func _on_request_hint_requested() -> void:
-	_hints_popup.hide()
-	if _current_hint.is_empty():
-		return
-	if not _unlocked_hints.has(_current_hint):
-		_unlocked_hints.append(_current_hint)
-		_hints_popup.clear_hints()
-		_hints_popup.add_hint(_current_hint)
-	await _show_dialogue("Guide", _current_hint)
+func _on_calc_toggle_pressed() -> void:
+	_calc_overlay.visible = not _calc_overlay.visible
+	get_node("%CalcToggle").text = "Calc ▼" if _calc_overlay.visible else "Calc ▲"
 
 # ---------------------------------------------------------------------------
 # AI responses
@@ -155,7 +127,6 @@ func _on_request_hint_requested() -> void:
 func _on_question_generated(data: Dictionary) -> void:
 	var question: String = data.get("question", "")
 	var answer: String   = data.get("answer",   "")
-	var hint: String     = data.get("hint",      "")
 
 	if question.is_empty() or answer.is_empty():
 		set_problem_text("(Could not generate question — is Ollama running?)")
@@ -164,7 +135,6 @@ func _on_question_generated(data: Dictionary) -> void:
 
 	_current_question = question
 	_expected_answer  = answer
-	_current_hint     = hint
 	set_problem_text(question)
 	_submit_btn.disabled = false
 	_answer_input.grab_focus()
@@ -197,7 +167,7 @@ func _maybe_show_battle_tutorial() -> void:
 		["Guide", "Welcome to your first math battle!"],
 		["Guide", "A math question will appear in the panel on the right. Read it carefully."],
 		["Guide", "Type your answer in the input field, then press Submit (or hit Enter)."],
-		["Guide", "If you need a nudge, tap the Hint button. Good luck!"],
+		["Guide", "Use the Calc button to open the calculator if you need it. Good luck!"],
 	]
 	var entries: Array[DialogueEntry] = []
 	for line in lines:
@@ -225,20 +195,6 @@ static func _skill_name(index: int) -> String:
 # Visual setup (unchanged from original)
 # ---------------------------------------------------------------------------
 
-func _apply_zoom() -> void:
-	var hgap = get_node("MarginContainer/ContentSplit/LeftVBox/VisualPanel/VisualHBox/HGap")
-	if hgap:
-		hgap.custom_minimum_size.x = 16.0
-	var bg           = get_node("%BattleBG")
-	var visual_hbox  = get_node("MarginContainer/ContentSplit/LeftVBox/VisualPanel/VisualHBox")
-	var zoom_scale   = Vector2(2.0, 2.0)
-	if bg:
-		bg.pivot_offset = bg.size / 2.0
-		bg.scale = zoom_scale
-	if visual_hbox:
-		visual_hbox.pivot_offset = visual_hbox.size / 2.0
-		visual_hbox.scale = zoom_scale
-		visual_hbox.position.y += 10.0
 
 func _setup_sprites() -> void:
 	var enemy_display  = get_node("%EnemyDisplay")
@@ -273,21 +229,44 @@ func _load_battle_texture(folder: String, texture_name: String) -> Texture2D:
 	return load(path) if ResourceLoader.exists(path) else null
 
 func _set_output_text(text: String) -> void:
-	_output_text.text = text
-	call_deferred("_adjust_output_font_size")
+	_status_label.text = text
 
-func _adjust_output_font_size() -> void:
-	var scroll := get_node("MarginContainer/ContentSplit/LeftVBox/OutputPanel/OutputMargin/OutputVBox/OutputScroll") as Control
-	var available := scroll.size.y
-	var width := _output_text.size.x
-	if width <= 0 or available <= 0:
-		return
-	var font = _output_text.get_theme_font("font")
-	for f_size in range(24, 7, -1):
-		_output_text.add_theme_font_size_override("font_size", f_size)
-		var text_size = font.get_multiline_string_size(_output_text.text, HORIZONTAL_ALIGNMENT_LEFT, width, f_size)
-		if text_size.y <= available:
-			return
+const _CALC_LAYOUT: Array = [
+	["sin", "cos", "tan", "^",  "π"],
+	["7",   "8",   "9",   "÷",  "⌫"],
+	["4",   "5",   "6",   "×",  "AC"],
+	["1",   "2",   "3",   "-",  "("],
+	["0",   ".",   "x",   "+",  ")"],
+]
+
+func _build_calc_pad() -> void:
+	var grid := get_node("%CalcGrid")
+	for row in _CALC_LAYOUT:
+		for symbol: String in row:
+			var btn := Button.new()
+			btn.text = symbol
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn.size_flags_vertical   = Control.SIZE_EXPAND_FILL
+			btn.custom_minimum_size   = Vector2(0, 52)
+			btn.pressed.connect(_on_calc_pressed.bind(symbol))
+			grid.add_child(btn)
+
+func _on_calc_pressed(symbol: String) -> void:
+	match symbol:
+		"⌫":
+			if not _answer_input.text.is_empty():
+				_answer_input.text = _answer_input.text.left(_answer_input.text.length() - 1)
+		"AC":
+			_answer_input.text = ""
+		"÷":
+			_answer_input.text += "/"
+		"×":
+			_answer_input.text += "*"
+		"sin", "cos", "tan":
+			_answer_input.text += symbol + "("
+		_:
+			_answer_input.text += symbol
+	_answer_input.caret_column = _answer_input.text.length()
 
 func set_problem_text(text: String) -> void:
 	var label = get_node("%ProblemText")
