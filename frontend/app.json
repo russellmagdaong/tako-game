@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "TAKO Frontend",
+    "slug": "tako-frontend",
+    "scheme": "takofrontend",
+    "platforms": ["ios", "android", "web"],
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "plugins": ["expo-router"],
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
