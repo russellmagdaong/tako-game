@@ -187,3 +187,33 @@ TAKO/
 | Gilo, Eric Jonhson H. | Backend Developer |
 | Guillermo, Christian P. | UI/UX Designer |
 | Magdaong, Russell D. | Game Developer |
+
+---
+
+## 10. AI Usage Disclosure
+
+TAKO incorporates Artificial Intelligence (AI) across gameplay and development to enhance learning outcomes and speed up development. Below is a disclosure of where and how AI is used:
+
+### 🎮 Gameplay & Learning Features
+- **Dynamic Phrasing (Google Gemini 2.5 Flash):** AI is used to translate deterministic math parameters (such as `x + y` variables) into diverse, engaging question formats (story problems, character dialogue, and direct equations).
+- **Personalized Feedback (Google Gemini 2.5 Flash):** When a player submits an incorrect answer, Gemini analyzes the specific math values and misconception categories to produce encouraging, step-by-step guidance.
+- **Bilingual Translation:** Gemini phrasings automatically adapt strictly to English or Tagalog (Filipino) depending on the player's selected preferences.
+- **On-Device Offline AI (Scaffolded):** The app includes scaffolding for local on-device inference using Google Gemini Nano via Android AICore.
+
+### 💻 Development & Engineering
+- **Code Assistance:** LLM-based coding assistants (Google DeepMind's Antigravity, Anthropic's Claude) were used as programming companions to write utility code, debug SQLite database queries, refactor GDScript architecture, design responsive Godot UI panels, and perform pre-presentation security audits.
+
+---
+
+## 11. Licenses & Third-Party Credits
+
+TAKO is open-source software licensed under the **[MIT License](file:///d:/Tako/tako-game/LICENSE)**.
+
+### Third-Party Software & Plugins
+- **Godot Engine:** Distributed under the [MIT License](https://godotengine.org/license). Copyright (c) 2014-present Juan Linietsky, Ariel Manzur, and Godot Engine contributors.
+- **godot-sqlite addon:** Distributed under the [MIT License](https://github.com/2shady4u/godot-sqlite). Copyright (c) 2021-present 2shady4u.
+
+### Assets & Design Credits
+- **Typography:**
+  - *Dedicool:* Font file licensed under the SIL Open Font License (OFL).
+- **Icons & Sprites:** Custom team art and public domain assets, used under CC0 (Public Domain) or open-source equivalents.
