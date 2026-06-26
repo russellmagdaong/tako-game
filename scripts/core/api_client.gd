@@ -36,6 +36,7 @@ func _ready() -> void:
 	_load_ai_config()
 	_http = HTTPRequest.new()
 	_http.process_mode = Node.PROCESS_MODE_ALWAYS
+	_http.timeout = 20.0 # fall back to templates if the AI call stalls
 	add_child(_http)
 	_http.request_completed.connect(_on_request_completed)
 	
@@ -58,7 +59,13 @@ func _load_ai_config() -> void:
 	if not model.is_empty():
 		gemini_model = model
 
+	# Key sources, in priority order:
+	#   1. project setting (tako/gemini/api_key) — present if not stripped for git
+	#   2. res://scripts/core/secrets.gd — gitignored, reliably bundled into exports
+	#   3. res://.env — developer-machine fallback
 	var key := str(ProjectSettings.get_setting("tako/gemini/api_key", "")).strip_edges()
+	if key.is_empty():
+		key = _read_secret_key()
 	if key.is_empty():
 		key = _read_env_gemini_key()
 
@@ -67,6 +74,15 @@ func _load_ai_config() -> void:
 		# Prefer the on-device Nano plugin when present; otherwise use Flash REST.
 		if not Engine.has_singleton(gemini_nano_plugin_name):
 			active_provider = AiProvider.GEMINI_1_5_FLASH
+
+func _read_secret_key() -> String:
+	var path := "res://scripts/core/secrets.gd"
+	if not ResourceLoader.exists(path):
+		return ""
+	var s = load(path)
+	if s is GDScript:
+		return str(s.get_script_constant_map().get("GEMINI_API_KEY", "")).strip_edges()
+	return ""
 
 func _read_env_gemini_key() -> String:
 	var path := "res://.env"

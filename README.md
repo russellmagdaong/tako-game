@@ -8,7 +8,7 @@ The entire experience — authentication, dashboard, and gameplay — ships as a
 
 ## 1. Project Overview
 
-Players begin as a student inside a billiard hall (a nod to the development team, **Billiard Boys**). Guided by an in-game AI companion, the player moves to a school building with **4 subject doors**: Mathematics, Science, Languages, and Philippine History. In this prototype the **Mathematics door is active**, demonstrating a scalable architecture ready to receive other subjects.
+Players begin as a student inside a billiard hall (a nod to the development team, **Billiard Boys**). The player moves to a school building with **4 subject doors**: Mathematics, Science, Languages, and Philippine History. In this prototype the **Mathematics door is active**, demonstrating a scalable architecture ready to receive other subjects.
 
 Behind the Mathematics door is a grade hall with classrooms for **Grades 7–10**. Progress is **non-gated** — players can enter any grade, backtrack, and review in any order. Encountering an enemy triggers a DepEd-curriculum math question. Answering incorrectly produces **AI-generated feedback** that reacts to the player's actual answer and gets more specific with each attempt, in the player's chosen language.
 

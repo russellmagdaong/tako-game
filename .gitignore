@@ -8,6 +8,7 @@
 *.local
 supabase_config.json
 local_supabase_config.json
+scripts/core/secrets.gd
 
 # Node dependencies
 node_modules/
