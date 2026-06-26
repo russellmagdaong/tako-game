@@ -1,102 +1,158 @@
 # TAKO — Teaching with Adaptive Knowledge Orchestration
 
-TAKO is a mobile-first, offline-first educational math RPG built in Godot 4 (GDScript) for Android. The game blends narrative roleplaying elements with a bilingual learning companion that provides adaptive math assistance.
+TAKO is a mobile-first, offline-first educational math RPG built in **Godot 4 (GDScript)** for Android. It blends narrative roleplaying with a bilingual (English / Filipino) AI learning companion that generates curriculum-aligned math questions and adaptive, personalized feedback.
+
+The entire experience — authentication, dashboard, and gameplay — ships as a **single Godot APK**.
 
 ---
 
 ## 1. Project Overview
 
-Players start as a student inside a billiard hall (a creative nod to the development team, Billiard Boys). Prompted by an in-game AI companion, the player transitions to a school building featuring **4 locked subject doors**: Mathematics, Science, Languages, and Philippine History. In this prototype, the **Mathematics door is active and unlocked**, demonstrating a highly scalable architecture prepared to receive other subjects.
+Players begin as a student inside a billiard hall (a nod to the development team, **Billiard Boys**). Guided by an in-game AI companion, the player moves to a school building with **4 subject doors**: Mathematics, Science, Languages, and Philippine History. In this prototype the **Mathematics door is active**, demonstrating a scalable architecture ready to receive other subjects.
 
-Entering the Mathematics door leads to a grade hall containing classrooms for **Grades 7, 8, 9, and 10**. Progress is **non-gated**—players are free to enter any grade, backtrack from difficult problems, and review lessons in any order. Engaging with obstacles/enemies triggers math questions aligned with the DepEd curriculum. Answering incorrectly triggers personalized AI feedback explaining the mistake in the player's choice of language (English or Tagalog/Filipino).
-
----
-
-## 2. System Requirements
-
-To install and run the TAKO APK, the following device specifications are required:
-
-* **Game Execution (Minimum)**: Android 10.0 (API Level 29) or higher.
-* **On-Device Offline AI (Gemini Nano)**: Android 14.0 (API Level 34) or higher on supported devices featuring Android AICore services (e.g., Google Pixel 8/9 series, Samsung Galaxy S24 series).
-* **Network Connectivity**: Optional. The game runs fully offline using a local database save state. Progress is automatically synced to the cloud backend whenever an internet connection becomes active.
+Behind the Mathematics door is a grade hall with classrooms for **Grades 7–10**. Progress is **non-gated** — players can enter any grade, backtrack, and review in any order. Encountering an enemy triggers a DepEd-curriculum math question. Answering incorrectly produces **AI-generated feedback** that reacts to the player's actual answer and gets more specific with each attempt, in the player's chosen language.
 
 ---
 
-## 3. Core Software Architecture Updates
+## 2. Key Features
 
-Recent engineering cycles implemented the following features:
-
-### A. Offline-First SQLite Database Integration
-* Integrated [db_manager.gd](file:///d:/Tako/tako-game/scripts/SQLite/db_manager.gd) as a global Autoload singleton.
-* Configured local schemas on the device (`user://tako.db`) for tracking user profiles, progress, and question attempt logs.
-* Implemented automatic table migrations (mapping integer IDs to text UUIDs) and dirty flags to support seamless syncing to Supabase.
-
-### B. Curriculum-Aligned Question Templates
-* Implemented 14 parameterized, deterministic math templates in [question_templates.gd](file:///d:/Tako/tako-game/scripts/gameplay/math/question_templates.gd) covering Grades 7–10:
-  * **Grade 7**: Basic negative arithmetic, simplifying fractions, decimal-to-fraction conversions, linear equations, rectangle perimeter.
-  * **Grade 8**: Exponent multiplication, multi-step linear equations, linear slopes, systems of linear equations.
-  * **Grade 9**: Quadratic equations, Pythagorean theorem.
-  * **Grade 10**: Mean/median/mode statistics, bag-drawing probability, circle circumference.
-* Every lambda block inside the template definitions is fully parenthesized `(func(): ...)` to resolve GDScript compilation/indentation unindent parsing errors.
-
-### C. Equivalence Answer Validation
-* Created [answer_validator.gd](file:///d:/Tako/tako-game/scripts/gameplay/math/answer_validator.gd) to parse and match equivalent formats, ensuring that equivalent answers (such as fraction `1/2`, decimal `0.5`, or non-simplified fractions like `2/4`) are evaluated as correct.
-
-### D. Dual-Provider Gemini Integration
-* Refactored [api_client.gd](file:///d:/Tako/tako-game/scripts/core/api_client.gd) to support dynamic provider switching:
-  * **Google Gemini 1.5 Flash (Online REST)**: Uses standard HTTPS POST requests to Google's generative developer API when an internet connection is present.
-  * **Google Gemini Nano (Offline JNI)**: Communicates asynchronously via native JNI signals with a Godot Android Plugin (`GodotGeminiNano`) to generate offline feedback on-device.
-  * **Ollama (Local Developer Testing)**: Bypassed on Android builds, this local option remains available solely for debugging in the Godot PC editor.
-
-### E. Secure Environment Key Configuration
-* Added a local [.env](file:///d:/Tako/tako-game/.env) config loader to keep API keys secure during developer testing. The key is parsed on startup and omitted from Git via [.gitignore](file:///d:/Tako/tako-game/.gitignore).
+- **Single consolidated app** — landing, sign in / sign up, dashboard, and the RPG all run inside one Godot project.
+- **Offline-first** — a local SQLite database stores all player data. The game is fully playable with no network connection.
+- **Flexible accounts** — play instantly as a **Guest** (fully offline), or create an **online account** (Supabase email/password) whose progress syncs to the cloud. If the backend is unreachable, sign-up/sign-in gracefully fall back to a local account.
+- **Cloud sync** — when signed in online, local changes are pushed to Supabase automatically.
+- **AI-generated content** — Google Gemini phrases each question uniquely and writes encouraging, misconception-aware feedback.
+- **Bilingual** — English and Tagalog/Filipino throughout questions and feedback.
 
 ---
 
-## 4. AI & Phrasing Architecture
+## 3. Technology Stack
 
-To avoid hallucinated math grading and incorrect solutions, TAKO separates **math grading logic** from **natural language generation**:
+| Layer | Technology |
+|---|---|
+| **Game Engine** | Godot Engine **4.6.2** (GDScript) |
+| **Local Storage** | `godot-sqlite` addon (`user://tako.db`) |
+| **Cloud Backend** | Supabase (PostgreSQL, GoTrue Auth, PostgREST) |
+| **AI (online)** | Google **Gemini 2.5 Flash** (REST API) |
+| **AI (on-device, scaffolded)** | Google Gemini Nano via Android AICore (see §7) |
+| **AI (dev only)** | Ollama (local desktop testing) |
 
-| Layer / Responsibility | Handler | Rationale |
+---
+
+## 4. Architecture
+
+### Autoload singletons (`scripts/core/`)
+- **`AuthManager`** — guest sessions (local UUID, offline), Supabase GoTrue email/password auth, offline local-account fallback, session persistence (`user://auth_session.json`).
+- **`GameManager`** — app entry point; shows landing / dashboard based on session, and drives the RPG.
+- **`SceneManager`** — level loading, transitions, and battles.
+- **`PlayerDataManager`** — in-memory player facade persisted through SQLite.
+- **`SupabaseSyncManager`** — pushes dirty local rows to Supabase (one-way local→cloud) on a timer when online and authenticated.
+- **`ApiClient`** — AI provider abstraction (Gemini Flash / Gemini Nano / Ollama) with a static-template fallback.
+- **`DatabaseManager`** (`scripts/SQLite/`) — SQLite schema, migrations, and data access.
+
+### AI & phrasing separation
+To avoid the LLM ever mis-grading math, **correctness logic is fully deterministic** and separated from natural-language generation:
+
+| Responsibility | Handler | Rationale |
 |---|---|---|
-| **Math Correctness** | Deterministic GDScript | Answers are compared and parsed in code—never by the LLM. |
-| **Misconception Matching** | Rule-Based Templates | Wrong answers are compared to known math errors (e.g., adding denominators directly) before passing metadata to the AI. |
-| **Explanation Phrasing** | Gemini 1.5 Flash / Gemini Nano | The AI takes the verified misconception metadata and phrases it into an encouraging, in-character explanation. |
+| **Math correctness** | Deterministic GDScript (`AnswerValidator`) | Answers are parsed/compared in code — never by the AI. Equivalent forms (`1/2`, `0.5`, `2/4`) are accepted. |
+| **Misconception matching** | Rule-based templates (`QuestionTemplates`) | Wrong answers are matched to known error patterns before any AI call. |
+| **Question & feedback phrasing** | Gemini 2.5 Flash | The AI turns verified specs/misconceptions into unique questions and escalating, in-character explanations. |
+
+### Curriculum content
+14 parameterized, deterministic templates in [question_templates.gd](scripts/gameplay/math/question_templates.gd):
+- **Grade 7:** negative-integer arithmetic, simplifying fractions, decimal→fraction, linear equations, rectangle perimeter.
+- **Grade 8:** exponent product rule, multi-step linear equations, slope between two points.
+- **Grade 9:** quadratic discriminant, distance between points (Pythagorean), direct variation.
+- **Grade 10:** median of a data set, circle circumference, probability (drawing from a bag).
+
+If the AI is unavailable, deterministic question/feedback templates in `MathManager` are used instead, so gameplay never blocks.
 
 ---
 
-## 5. Technology Stack
+## 5. System Requirements
 
-* **Game Engine**: Godot Engine 4.6.2 (GDScript)
-* **Local Storage**: Godot SQLite addon
-* **Cloud Storage & Sync**: Supabase (PostgreSQL + REST Auth)
-* **AI Engine**: Gemini 1.5 Flash (Cloud API) & Gemini Nano (Android AICore JNI)
+- **Run the APK:** Android 7.0 (API 24) or higher (as configured in the Android export).
+- **Network:** Optional. The game runs fully offline; online accounts and cloud sync activate when a connection is available.
+- **On-device offline AI (Gemini Nano):** only on AICore-capable flagships (e.g., Pixel 8/9, Galaxy S24/S25). Not active in the current build — see §7.
 
 ---
 
-## 6. Project Directory Structure
+## 6. Setup & Installation
+
+### Prerequisites
+- **Godot Engine 4.6.2** (standard build).
+- For Android export: **Android export templates** (Godot → Editor → Manage Export Templates) and a configured **Android SDK / keystore**.
+
+### Run in the editor
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/russellmagdaong/tako-game.git
+   ```
+2. Open the project in **Godot 4.6.2** (import `project.godot`). The first import builds the asset cache.
+3. Configure the **Gemini API key** (required for AI; kept out of git):
+   - Create a file named `.env` in the project root (`res://.env`) with:
+     ```
+     GEMINI_API_KEY="your-google-gemini-api-key"
+     ```
+   - Get a key from [Google AI Studio](https://aistudio.google.com/apikey). `.env` is gitignored and bundled into the APK via the export filter.
+4. The **Supabase URL and anon key** are already set in `project.godot` under the `[tako]` section. To point at your own project, edit `tako/supabase/url` and `tako/supabase/anon_key`.
+5. Press **F5** to run. You'll land on the title screen — tap **Play as Guest** to start immediately, or **Sign In / Sign Up** for an online account.
+
+### Build the Android APK
+1. Project → **Export** → select the **Android** preset (outputs `../TAKO.apk`).
+2. Ensure a debug/release keystore is configured, then **Export Project**.
+3. Install on a device/emulator (e.g., `adb install -r TAKO.apk`).
+
+### Backend (Supabase) setup
+If you use your own Supabase project, the app expects these tables: `profiles`, `progress`, `question_attempts`, `player_state`, `defeated_enemies`, `achievements`, `triggered_dialogues`, `subjects` (column shapes match `TABLE_CONFIG` in [supabase_sync_manager.gd](scripts/core/supabase_sync_manager.gd)).
+
+For online accounts and cloud sync to work:
+- Enable **Row-Level Security** policies allowing each authenticated user to manage their own rows (`auth.uid() = user_id`, and `auth.uid() = id` for `profiles`), plus a `handle_new_user` trigger to create a `profiles` row on signup.
+- For frictionless testing, disable email confirmation under **Authentication → Sign In / Providers → Email**, or configure custom **SMTP** (the built-in email service is heavily rate-limited).
+
+---
+
+## 7. On-Device AI (Gemini Nano) — Status
+
+`ApiClient` includes a complete code path for **Gemini Nano** (offline, on-device) via a Godot Android plugin (`GodotGeminiNano`). It is **scaffolding only** in the current build: no plugin is bundled, so the app never activates it and there is no impact on existing behavior.
+
+- **Online:** Gemini 2.5 Flash (cloud).
+- **Offline:** deterministic static templates.
+- **Future:** on AICore-capable devices, adding the `GodotGeminiNano` plugin would enable offline AI feedback automatically; unsupported devices continue using the fallback.
+
+---
+
+## 8. Project Directory Structure
 
 ```
 TAKO/
 ├── scenes/
-│   ├── core/          # GameManager, SceneManager, MainMenu, CharacterSelect
-│   ├── gameplay/      # BattleScene, DialogueTrigger, Interactable
-│   ├── levels/        # Billiards, School, Grade7-10 Halls
-│   └── ui/            # DialogueBox, PauseMenu, HintsPopup, VirtualControls
+│   ├── core/          # GameManager, MainMenu, CharacterSelect
+│   ├── gameplay/      # BattleScene, interactables, triggers
+│   ├── levels/        # Billiards, School, Grade 7–10 halls
+│   └── ui/
+│       ├── auth/      # LandingScreen, LoginScreen
+│       ├── dashboard/ # Dashboard (Home / World / Settings tabs)
+│       └── ...        # DialogueBox, PauseMenu, VirtualControls
 ├── scripts/
-│   ├── core/          # Autoloads: ApiClient, GameManager, PlayerDataManager, Globals
-│   ├── gameplay/      # BattleScene, Level loaders, movement animation state machines
+│   ├── core/          # Autoloads: AuthManager, GameManager, SceneManager,
+│   │                  #   PlayerDataManager, SupabaseSyncManager, ApiClient, Globals
+│   ├── gameplay/
 │   │   └── math/      # QuestionTemplates, AnswerValidator, MathManager
-│   └── SQLite/        # db_manager.gd (SQLite database controller)
-├── resources/         # Themes, fonts, tilesets
-├── assets/            # Audio, character sprites, monster frames, backgrounds
-├── .gitignore         # Ignores .godot/ cache and local .env files
-└── project.godot      # Godot engine project registry (Autoloads, input mapping)
+│   ├── ui/
+│   │   ├── auth/      # landing_screen.gd, login_screen.gd
+│   │   └── dashboard/ # dashboard.gd
+│   └── SQLite/        # db_manager.gd
+├── resources/         # Themes, fonts, tilesets, UI styles
+├── assets/            # Audio, sprites, backgrounds, logo
+├── .env               # Gemini API key (gitignored, dev-supplied)
+├── export_presets.cfg # Android / Web export configuration
+└── project.godot      # Autoloads, Supabase config, input mapping
 ```
 
 ---
 
-## 7. Team Members & Roles
+## 9. Team Members & Roles
 
 **Team Name:** Billiard Boys
 

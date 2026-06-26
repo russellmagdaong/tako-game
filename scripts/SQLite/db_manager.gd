@@ -301,6 +301,30 @@ func get_or_create_local_user_id() -> String:
 	save_profile(local_user_id, LOCAL_USERNAME)
 	return local_user_id
 
+# Consolidates ALL locally-owned rows onto a single user id. Used when an
+# offline/guest profile signs in online so every row matches the authenticated
+# user id and therefore passes Supabase row-level security. Any pre-existing
+# guest/local id (or leftover split data) is re-keyed onto new_id. Rows that
+# would collide with an existing destination row are skipped (UPDATE OR IGNORE)
+# and the leftover source rows removed.
+func consolidate_local_data(new_id: String) -> void:
+	new_id = new_id.strip_edges()
+	if new_id.is_empty():
+		return
+	if not is_initialized:
+		open_database()
+
+	var user_tables := ["progress", "question_attempts", "player_state", "triggered_dialogues", "defeated_enemies", "achievements"]
+	for t in user_tables:
+		db.query("UPDATE OR IGNORE %s SET user_id = '%s', is_dirty = 1 WHERE user_id != '%s';" % [t, new_id, new_id])
+		db.query("DELETE FROM %s WHERE user_id != '%s';" % [t, new_id])
+
+	# profiles is keyed by id (not user_id)
+	db.query("UPDATE OR IGNORE profiles SET id = '%s', is_dirty = 1 WHERE id != '%s';" % [new_id, new_id])
+	db.query("DELETE FROM profiles WHERE id != '%s';" % new_id)
+
+	GameLogger.info("DatabaseManager: Consolidated all local data onto %s." % new_id)
+
 func save_player_state(
 		user_id: String,
 		username: String,

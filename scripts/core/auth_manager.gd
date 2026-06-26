@@ -204,7 +204,12 @@ func _apply_auth_response(data, p_email: String) -> void:
 	else:
 		email = p_email
 
+	# Re-key any offline/guest data onto this authenticated id so it satisfies
+	# Supabase row-level security (otherwise its upserts are rejected with 42501).
+	DatabaseManager.consolidate_local_data(user_id)
+
 	PlayerDataManager.user_id = user_id
+	PlayerDataManager.load_data()
 	_save_session()
 	_apply_session_to_sync()
 	GameLogger.info("AuthManager: Signed in as %s." % email)
