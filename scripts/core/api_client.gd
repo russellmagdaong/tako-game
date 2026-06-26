@@ -178,6 +178,13 @@ func _flush() -> void:
 			_nano_plugin.call("generate_content", prompt)
 
 func _handle_request_error(err: int) -> void:
+	GameLogger.warning("AiClient: Request error %d for [%s]. Attempting local fallback..." % [err, _current_tag])
+	if _generate_local_fallback(_current_tag):
+		_current_tag = ""
+		_busy = false
+		_flush()
+		return
+
 	GameLogger.error("AiClient: request error %d for [%s]" % [err, _current_tag])
 	request_failed.emit(_current_tag, err)
 	_busy = false
@@ -189,6 +196,10 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 	_busy = false
 
 	if result != HTTPRequest.RESULT_SUCCESS or response_code < 200 or response_code >= 300:
+		GameLogger.warning("AiClient: HTTP result=%d code=%d tag=%s. Attempting local fallback..." % [result, response_code, tag])
+		if _generate_local_fallback(tag):
+			_flush()
+			return
 		GameLogger.error("AiClient: HTTP result=%d code=%d tag=%s" % [result, response_code, tag])
 		request_failed.emit(tag, response_code)
 		_flush()
@@ -197,6 +208,10 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 	var text := body.get_string_from_utf8()
 	var outer := JSON.new()
 	if outer.parse(text) != OK or not outer.data is Dictionary:
+		GameLogger.warning("AiClient: outer JSON parse failed for tag=%s. Attempting local fallback..." % tag)
+		if _generate_local_fallback(tag):
+			_flush()
+			return
 		GameLogger.error("AiClient: outer JSON parse failed for tag=%s" % tag)
 		request_failed.emit(tag, -1)
 		_flush()
@@ -222,6 +237,10 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 	if inner.parse(response_text) == OK and inner.data is Dictionary:
 		data = inner.data
 	else:
+		GameLogger.warning("AiClient: inner JSON parse failed for tag=%s. Attempting local fallback... Raw: %s" % [tag, response_text])
+		if _generate_local_fallback(tag):
+			_flush()
+			return
 		GameLogger.error("AiClient: inner JSON parse failed for tag=%s. Raw text: %s" % [tag, response_text])
 		request_failed.emit(tag, -1)
 		_flush()
@@ -250,6 +269,10 @@ func _on_nano_content_generated(response_text: String) -> void:
 	if inner.parse(response_text) == OK and inner.data is Dictionary:
 		data = inner.data
 	else:
+		GameLogger.warning("AiClient (Nano): inner JSON parse failed for tag=%s. Attempting local fallback... Raw: %s" % [tag, response_text])
+		if _generate_local_fallback(tag):
+			_flush()
+			return
 		GameLogger.error("AiClient (Nano): inner JSON parse failed for tag=%s. Raw: %s" % [tag, response_text])
 		request_failed.emit(tag, -1)
 		_flush()
@@ -268,6 +291,25 @@ func _on_nano_generation_failed(error_message: String) -> void:
 	var tag := _current_tag
 	_current_tag = ""
 	_busy = false
+	GameLogger.warning("AiClient (Nano) Error: %s for tag=%s. Attempting local fallback..." % [error_message, tag])
+	if _generate_local_fallback(tag):
+		_flush()
+		return
 	GameLogger.error("AiClient (Nano) Error: %s for tag=%s" % [error_message, tag])
 	request_failed.emit(tag, -2)
 	_flush()
+
+# Generates static fallback content in GDScript.
+func _generate_local_fallback(tag: String) -> bool:
+	match tag:
+		"question_generate":
+			var data = MathManager.get_static_fallback_question(Globals.preferred_language)
+			GameLogger.info("ApiClient: Generated local fallback question successfully.")
+			question_generated.emit(data)
+			return true
+		"feedback_generate":
+			var data = MathManager.get_static_fallback_feedback(MathManager.last_misconception, Globals.preferred_language)
+			GameLogger.info("ApiClient: Generated local fallback feedback successfully.")
+			feedback_generated.emit(data)
+			return true
+	return false
