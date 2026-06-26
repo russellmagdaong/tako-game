@@ -1,8 +1,32 @@
 # TAKO — Teaching with Adaptive Knowledge Orchestration
 
+![Godot](https://img.shields.io/badge/Godot-4.6.2-478CBF?logo=godotengine&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+![Language](https://img.shields.io/badge/Language-GDScript-355570)
+![AI](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-8E75B2?logo=googlegemini&logoColor=white)
+![Backend](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 TAKO is a mobile-first, offline-first educational math RPG built in **Godot 4 (GDScript)** for Android. It blends narrative roleplaying with a bilingual (English / Filipino) AI learning companion that generates curriculum-aligned math questions and adaptive, personalized feedback.
 
 The entire experience — authentication, dashboard, and gameplay — ships as a **single Godot APK**.
+
+---
+
+## Table of Contents
+
+1. [Project Overview](#1-project-overview)
+2. [Key Features](#2-key-features)
+3. [Technology Stack](#3-technology-stack)
+4. [Architecture](#4-architecture)
+5. [System Requirements](#5-system-requirements)
+6. [Setup & Installation](#6-setup--installation)
+7. [How to Play](#7-how-to-play)
+8. [On-Device AI (Gemini Nano)](#8-on-device-ai-gemini-nano)
+9. [Project Directory Structure](#9-project-directory-structure)
+10. [Team Members & Roles](#10-team-members--roles)
+11. [AI Usage Disclosure](#11-ai-usage-disclosure)
+12. [Licenses & Third-Party Credits](#12-licenses--third-party-credits)
 
 ---
 
@@ -45,12 +69,30 @@ TAKO is designed to address educational and social disparities in developing nat
 | **Local Storage** | `godot-sqlite` addon (`user://tako.db`) |
 | **Cloud Backend** | Supabase (PostgreSQL, GoTrue Auth, PostgREST) |
 | **AI (online)** | Google **Gemini 2.5 Flash** (REST API) |
-| **AI (on-device, scaffolded)** | Google Gemini Nano via Android AICore (see §7) |
+| **AI (on-device, scaffolded)** | Google Gemini Nano via Android AICore (see §8) |
 | **AI (dev only)** | Ollama (local desktop testing) |
 
 ---
 
 ## 4. Architecture
+
+### Data & AI flow
+
+```mermaid
+flowchart TD
+    P["Player (WASD / on-screen joystick)"] --> B["Math Battle"]
+    B --> G["MathManager + AnswerValidator<br/>(deterministic grading)"]
+    B --> A["ApiClient"]
+    A -->|"online"| GF["Gemini 2.5 Flash<br/>(question phrasing + feedback)"]
+    A -->|"429 quota"| KR["Key pool: rotate to next key"]
+    KR --> GF
+    A -->|"offline / all keys exhausted"| T["Static curriculum templates"]
+    G --> L[("Local SQLite<br/>user://tako.db")]
+    L -->|"dirty rows, when signed in + online"| S["SupabaseSyncManager"]
+    S --> C[("Supabase Cloud<br/>Postgres + Auth")]
+    AU["AuthManager"] -->|"guest = local, offline"| L
+    AU -->|"account"| C
+```
 
 ### Autoload singletons (`scripts/core/`)
 - **`AuthManager`** — guest sessions (local UUID, offline), Supabase GoTrue email/password auth, offline local-account fallback, session persistence (`user://auth_session.json`).
@@ -85,7 +127,7 @@ If the AI is unavailable, deterministic question/feedback templates in `MathMana
 
 - **Run the APK:** Android 7.0 (API 24) or higher (as configured in the Android export).
 - **Network:** Optional. The game runs fully offline; online accounts and cloud sync activate when a connection is available.
-- **On-device offline AI (Gemini Nano):** only on AICore-capable flagships (e.g., Pixel 8/9, Galaxy S24/S25). Not active in the current build — see §7.
+- **On-device offline AI (Gemini Nano):** only on AICore-capable flagships (e.g., Pixel 8/9, Galaxy S24/S25). Not active in the current build — see §8.
 
 ---
 
@@ -137,7 +179,37 @@ For online accounts and cloud sync to work:
 
 ---
 
-## 7. On-Device AI (Gemini Nano) — Status
+## 7. How to Play
+
+**Goal:** Explore the school, enter the Mathematics door, and clear math battles across Grades 7–10.
+
+**Movement & Exploration**
+
+For Keyboard & Mouse
+- **Move:** `W` `A` `S` `D`
+- **Run:** hold `Shift`
+- **Interact / advance dialogue:** `E`
+- **Menu:** click the gear icon (top-left) for settings / return to dashboard
+
+For Touch Controls
+- **Move:** touch and hold anywhere on the **left half** of the screen — a virtual joystick appears under your thumb; drag to steer.
+- **Interact / advance dialogue:** tap the **E** button in the bottom-right corner.
+- **Menu:** tap the gear icon (top-left) for settings / return to dashboard.
+- *Running is keyboard-only; on touch the character moves at walking speed.*
+
+**Math battles**
+- Walking into an enemy starts a battle and shows a math question (AI-phrased when online, template-based offline).
+- Type your answer in the input box — open the on-screen **Calc** if you need it — then press **Submit** (or `Enter`).
+- **Correct** clears the encounter. **Wrong** gives adaptive feedback (tap **Help** to review it) and lets you try again; the guidance gets more specific each attempt.
+
+**Dashboard tabs**
+- **Home** — your stats (monsters defeated, questions answered, accuracy, best streak, overall progress).
+- **World** — **Start Adventure** to jump into the game.
+- **Settings** — edit username, change character, toggle sound, switch language (English/Filipino), or log out.
+
+---
+
+## 8. On-Device AI (Gemini Nano)
 
 `ApiClient` includes a complete code path for **Gemini Nano** (offline, on-device) via a Godot Android plugin (`GodotGeminiNano`). It is **scaffolding only** in the current build: no plugin is bundled, so the app never activates it and there is no impact on existing behavior.
 
@@ -147,7 +219,7 @@ For online accounts and cloud sync to work:
 
 ---
 
-## 8. Project Directory Structure
+## 9. Project Directory Structure
 
 ```
 TAKO/
@@ -177,7 +249,7 @@ TAKO/
 
 ---
 
-## 9. Team Members & Roles
+## 10. Team Members & Roles
 
 **Team Name:** Billiard Boys
 
@@ -190,7 +262,7 @@ TAKO/
 
 ---
 
-## 10. AI Usage Disclosure
+## 11. AI Usage Disclosure
 
 TAKO incorporates Artificial Intelligence (AI) across gameplay and development to enhance learning outcomes and speed up development. Below is a disclosure of where and how AI is used:
 
@@ -205,13 +277,16 @@ TAKO incorporates Artificial Intelligence (AI) across gameplay and development t
 
 ---
 
-## 11. Licenses & Third-Party Credits
+## 12. Licenses & Third-Party Credits
 
 TAKO is open-source software licensed under the **[MIT License](file:///d:/Tako/tako-game/LICENSE)**.
 
 ### Third-Party Software & Plugins
 - **Godot Engine:** Distributed under the [MIT License](https://godotengine.org/license). Copyright (c) 2014-present Juan Linietsky, Ariel Manzur, and Godot Engine contributors.
 - **godot-sqlite addon:** Distributed under the [MIT License](https://github.com/2shady4u/godot-sqlite). Copyright (c) 2021-present 2shady4u.
+
+### Code References & Acknowledgments
+- **Pokémon Godot (C#) by joeythelantern** — [github.com/joeythelantern/pokemon-godot-csharp](https://github.com/joeythelantern/pokemon-godot-csharp). Referenced for the overall project/code structure and core game fundamentals — player and camera setup, grid-based movement, and building/level layout. Concepts were adapted and reimplemented in GDScript for TAKO.
 
 ### Assets & Design Credits
 - **Typography:**
