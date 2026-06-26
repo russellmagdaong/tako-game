@@ -12,6 +12,18 @@ Players begin as a student inside a billiard hall (a nod to the development team
 
 Behind the Mathematics door is a grade hall with classrooms for **Grades 7–10**. Progress is **non-gated** — players can enter any grade, backtrack, and review in any order. Encountering an enemy triggers a DepEd-curriculum math question. Answering incorrectly produces **AI-generated feedback** that reacts to the player's actual answer and gets more specific with each attempt, in the player's chosen language.
 
+### Social Impact & UN SDGs Alignment
+
+TAKO is designed to address educational and social disparities in developing nations, specifically targeting the Philippine public education system (DepEd curriculum). It directly aligns with the following UN Sustainable Development Goals:
+
+- **SDG 4: Quality Education**
+  - **Bilingual & Localized Learning:** Offers questions and explanations in both English and Tagalog/Filipino, ensuring students learn mathematical concepts in their primary language, which significantly enhances comprehension.
+  - **Adaptive AI Guidance:** By using Google Gemini to construct encouraging, misconception-aware feedback, it replicates private tutoring at scale for students who cannot afford traditional tutoring.
+  - **Non-Gated Curriculum:** Allows students to self-pace, revisit core concepts, and bridge knowledge gaps across Grade 7–10 math curriculums without punitive gating.
+- **SDG 10: Reduced Inequalities**
+  - **Offline-First Accessibility:** The local SQLite storage architecture enables full gameplay and local guest tracking without an internet connection. This bridges the digital divide for students in rural and low-connectivity regions.
+  - **Zero-Barrier Guest Mode:** Anyone can download the app and play immediately as a guest. All data is kept locally on the device, requiring no email verification or credentials.
+
 ---
 
 ## 2. Key Features
@@ -80,15 +92,15 @@ If the AI is unavailable, deterministic question/feedback templates in `MathMana
 ## 6. Setup & Installation
 
 ### Option A — Install the prebuilt APK (easiest)
-You don't need Godot or any build tools to play. A ready-to-install **`TAKO.apk`** is provided with the project.
+You don't need Godot or any build tools to play. A ready-to-install **`TakoGame.apk`** is provided with the project.
 
-1. Copy `TAKO.apk` to your Android device (or an emulator such as MuMu Player).
+1. Copy `TakoGame.apk` to your Android device (or an emulator such as MuMu Player).
 2. Open it and allow installation from unknown sources if prompted.
 3. Launch **TAKO** and tap **Play as Guest** to start immediately, or **Sign In / Sign Up** for a cloud account.
 
 The Supabase and Gemini keys are already bundled in this build, so online accounts, cloud sync, and AI work out of the box (with an internet connection). The game is also fully playable offline.
 
-> Via ADB: `adb install -r TAKO.apk`
+> Via ADB: `adb install -r TakoGame.apk`
 
 ### Option B — Run / build from source
 
@@ -112,9 +124,9 @@ The Supabase and Gemini keys are already bundled in this build, so online accoun
 5. Press **F5** to run. You'll land on the title screen — tap **Play as Guest** to start immediately, or **Sign In / Sign Up** for an online account.
 
 #### Build the Android APK
-1. Project → **Export** → select the **Android** preset (outputs `../TAKO.apk`).
+1. Project → **Export** → select the **Android** preset (outputs `../TakoGame.apk`).
 2. Ensure a debug/release keystore is configured, then **Export Project**.
-3. Install on a device/emulator (e.g., `adb install -r TAKO.apk`).
+3. Install on a device/emulator (e.g., `adb install -r TakoGame.apk`).
 
 #### Backend (Supabase) setup
 If you use your own Supabase project, the app expects these tables: `profiles`, `progress`, `question_attempts`, `player_state`, `defeated_enemies`, `achievements`, `triggered_dialogues`, `subjects` (column shapes match `TABLE_CONFIG` in [supabase_sync_manager.gd](scripts/core/supabase_sync_manager.gd)).

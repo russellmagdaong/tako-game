@@ -30,7 +30,15 @@ var _http: HTTPRequest
 var _queue: Array[Dictionary] = []
 var _busy: bool = false
 var _current_tag: String = ""
+var _current_prompt: String = ""
 var _nano_plugin: Object = null
+
+# Gemini API key pool with automatic failover. When a key hits its daily quota
+# (HTTP 429 / 403), the client rotates to the next key and retries the same
+# request. Only when ALL keys are exhausted does it fall back to static templates.
+var _gemini_keys: PackedStringArray = []
+var _key_index: int = 0
+var _rotations_this_request: int = 0
 
 func _ready() -> void:
 	_load_ai_config()
@@ -59,30 +67,57 @@ func _load_ai_config() -> void:
 	if not model.is_empty():
 		gemini_model = model
 
-	# Key sources, in priority order:
-	#   1. project setting (tako/gemini/api_key) — present if not stripped for git
-	#   2. res://scripts/core/secrets.gd — gitignored, reliably bundled into exports
-	#   3. res://.env — developer-machine fallback
-	var key := str(ProjectSettings.get_setting("tako/gemini/api_key", "")).strip_edges()
-	if key.is_empty():
-		key = _read_secret_key()
-	if key.is_empty():
-		key = _read_env_gemini_key()
-
-	if not key.is_empty():
-		gemini_api_key = key
+	# Build the Gemini API key pool from all available sources (deduped).
+	_gemini_keys = _load_gemini_keys()
+	_key_index = 0
+	if not _gemini_keys.is_empty():
+		gemini_api_key = _gemini_keys[0]
 		# Prefer the on-device Nano plugin when present; otherwise use Flash REST.
 		if not Engine.has_singleton(gemini_nano_plugin_name):
 			active_provider = AiProvider.GEMINI_1_5_FLASH
+		GameLogger.info("ApiClient: Loaded %d Gemini key(s) for failover." % _gemini_keys.size())
 
-func _read_secret_key() -> String:
+# Collects Gemini keys from every source, in priority order, deduped:
+#   1. project setting (tako/gemini/api_key)
+#   2. res://scripts/core/secrets.gd  (GEMINI_API_KEYS array preferred, else GEMINI_API_KEY)
+#   3. res://.env  (GEMINI_API_KEY)
+func _load_gemini_keys() -> PackedStringArray:
+	var raw: PackedStringArray = []
+	var ps := str(ProjectSettings.get_setting("tako/gemini/api_key", "")).strip_edges()
+	if not ps.is_empty():
+		raw.append(ps)
+	raw.append_array(_read_secret_keys())
+	var env_key := _read_env_gemini_key()
+	if not env_key.is_empty():
+		raw.append(env_key)
+
+	var seen := {}
+	var out: PackedStringArray = []
+	for k in raw:
+		var key := str(k).strip_edges()
+		if key.is_empty() or key.begins_with("PASTE"):
+			continue
+		if seen.has(key):
+			continue
+		seen[key] = true
+		out.append(key)
+	return out
+
+func _read_secret_keys() -> PackedStringArray:
+	var out: PackedStringArray = []
 	var path := "res://scripts/core/secrets.gd"
 	if not ResourceLoader.exists(path):
-		return ""
+		return out
 	var s = load(path)
-	if s is GDScript:
-		return str(s.get_script_constant_map().get("GEMINI_API_KEY", "")).strip_edges()
-	return ""
+	if not (s is GDScript):
+		return out
+	var consts: Dictionary = s.get_script_constant_map()
+	if consts.has("GEMINI_API_KEYS"):
+		for k in consts["GEMINI_API_KEYS"]:
+			out.append(str(k))
+	elif consts.has("GEMINI_API_KEY"):
+		out.append(str(consts["GEMINI_API_KEY"]))
+	return out
 
 func _read_env_gemini_key() -> String:
 	var path := "res://.env"
@@ -177,8 +212,15 @@ func _flush() -> void:
 	_busy = true
 	var req: Dictionary = _queue.pop_front()
 	_current_tag = req.tag
-	var prompt: String = req.prompt
-	
+	_current_prompt = req.prompt
+	_rotations_this_request = 0
+	_dispatch()
+
+# Sends the current request (_current_prompt / _current_tag) to the active
+# provider. Called both for fresh requests and for key-rotation retries.
+func _dispatch() -> void:
+	var prompt := _current_prompt
+
 	match active_provider:
 		AiProvider.OLLAMA:
 			var payload := {
@@ -192,13 +234,14 @@ func _flush() -> void:
 			var err := _http.request(OLLAMA_URL + "/api/generate", headers, HTTPClient.METHOD_POST, body)
 			if err != OK:
 				_handle_request_error(err)
-				
+
 		AiProvider.GEMINI_1_5_FLASH:
-			if gemini_api_key.is_empty():
-				GameLogger.error("AiClient: Gemini API Key is missing!")
+			if _gemini_keys.is_empty():
+				GameLogger.error("AiClient: No Gemini API key configured!")
 				_handle_request_error(ERR_UNCONFIGURED)
 				return
-				
+
+			gemini_api_key = _gemini_keys[_key_index]
 			var url := "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s" % [gemini_model, gemini_api_key]
 			var payload := {
 				"contents": [{
@@ -213,13 +256,13 @@ func _flush() -> void:
 			var err := _http.request(url, headers, HTTPClient.METHOD_POST, body)
 			if err != OK:
 				_handle_request_error(err)
-				
+
 		AiProvider.GEMINI_NANO:
 			if _nano_plugin == null:
 				GameLogger.error("AiClient: Gemini Nano plugin is not available on this platform!")
 				_handle_request_error(ERR_UNAVAILABLE)
 				return
-				
+
 			# Trigger the native Android AICore JNI generator asynchronously
 			_nano_plugin.call("generate_content", prompt)
 
@@ -242,6 +285,20 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 	_busy = false
 
 	if result != HTTPRequest.RESULT_SUCCESS or response_code < 200 or response_code >= 300:
+		# Quota / rate-limit hit: rotate to the next Gemini key and retry the same
+		# request before giving up. 429 = quota exceeded, 403 = often RESOURCE_EXHAUSTED.
+		if active_provider == AiProvider.GEMINI_1_5_FLASH \
+				and (response_code == 429 or response_code == 403) \
+				and _gemini_keys.size() > 1 \
+				and _rotations_this_request < _gemini_keys.size() - 1:
+			_key_index = (_key_index + 1) % _gemini_keys.size()
+			_rotations_this_request += 1
+			GameLogger.warning("AiClient: Gemini key quota hit (code %d). Rotating to key #%d/%d and retrying." % [response_code, _key_index + 1, _gemini_keys.size()])
+			_current_tag = tag
+			_busy = true
+			_dispatch()
+			return
+
 		GameLogger.warning("AiClient: HTTP result=%d code=%d tag=%s. Attempting local fallback..." % [result, response_code, tag])
 		if _generate_local_fallback(tag):
 			_flush()
