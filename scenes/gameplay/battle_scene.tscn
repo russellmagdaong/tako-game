@@ -225,6 +225,7 @@ text = "Your Answer"
 [node name="AnswerInput" type="LineEdit" parent="MarginContainer/ContentSplit/RightVBox/AnswerPanel/AnswerMargin/AnswerVBox" unique_id=200000018]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_jxadj")
 theme_override_font_sizes/font_size = 36
 theme_override_styles/normal = SubResource("StyleBoxFlat_drxpv")

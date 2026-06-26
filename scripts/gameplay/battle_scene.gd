@@ -260,7 +260,7 @@ func _set_output_text(text: String) -> void:
 const _CALC_LAYOUT: Array = [
 	["sin", "cos", "tan", "^",  "π"],
 	["7",   "8",   "9",   "÷",  "⌫"],
-	["4",   "5",   "6",   "×",  "AC"],
+	["4",   "5",   "6",   "*",  "AC"],
 	["1",   "2",   "3",   "-",  "("],
 	["0",   ".",   "x",   "+",  ")"],
 ]
@@ -286,8 +286,6 @@ func _on_calc_pressed(symbol: String) -> void:
 			_answer_input.text = ""
 		"÷":
 			_answer_input.text += "/"
-		"×":
-			_answer_input.text += "*"
 		"sin", "cos", "tan":
 			_answer_input.text += symbol + "("
 		_:
