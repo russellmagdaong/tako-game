@@ -122,7 +122,8 @@ func _submit_answer() -> void:
 			MathManager.active_expected_answer,
 			player_answer,
 			check_result["misconception"],
-			Globals.preferred_language
+			Globals.preferred_language,
+			_attempt_count
 		)
 
 func _is_correct_answer(player: String, expected: String) -> bool:
@@ -152,11 +153,11 @@ func _on_question_generated(data: Dictionary) -> void:
 
 	if question.is_empty():
 		if Globals.preferred_language == "tl":
-			set_problem_text("(Hindi makabuo ng tanong — tumatakbo ba ang Ollama?)")
-			_set_output_text("Siguraduhing naka-install at tumatakbo ang Ollama.")
+			set_problem_text("(Hindi makabuo ng tanong. Subukang muli.)")
+			_set_output_text("")
 		else:
-			set_problem_text("(Could not generate question — is Ollama running?)")
-			_set_output_text("Make sure Ollama is installed and running locally.")
+			set_problem_text("(Could not generate a question. Please try again.)")
+			_set_output_text("")
 		return
 
 	_current_question = question
@@ -175,8 +176,8 @@ func _on_request_failed(tag: String, code: int) -> void:
 	_awaiting_ai = false
 	match tag:
 		"question_generate":
-			set_problem_text("(AI unavailable — check that Ollama is running)")
-			_set_output_text("Could not reach Ollama. (Error %d)" % code)
+			set_problem_text("(Could not generate a question. Please try again.)")
+			_set_output_text("")
 		"feedback_generate":
 			_submit_btn.disabled = false
 			_set_output_text("Incorrect. Try again!")

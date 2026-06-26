@@ -58,6 +58,7 @@ func _notification(what: int) -> void:
 		exit_to_dashboard()
 
 func exit_to_dashboard() -> void:
-	GameLogger.info("MainMenu: Triggering deep link back to Expo dashboard...")
-	OS.shell_open("tako-dashboard://home?refresh=true")
-	get_tree().quit()
+	# Consolidated app: return to the in-app dashboard instead of deep-linking
+	# back to a separate Expo APK.
+	GameLogger.info("MainMenu: Returning to in-app dashboard...")
+	GameManager.show_dashboard()

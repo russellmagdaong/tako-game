@@ -10,12 +10,17 @@ extends Node
 @export_category("Vars")
 @export var player: Node
 
+const LANDING_SCENE := "res://scenes/ui/auth/landing_screen.tscn"
+const LOGIN_SCENE := "res://scenes/ui/auth/login_screen.tscn"
+const DASHBOARD_SCENE := "res://scenes/ui/dashboard/dashboard.tscn"
+
 var instance: Node
 var is_dev_boot: bool = false
 var dev_boot_level: int = Enums.LevelName.Level0
 var _pause_menu: Node
 var _settings_layer: CanvasLayer
 var _virtual_controls: Node
+var _ui_layer: CanvasLayer
 var _js_save_cb: JavaScriptObject
 
 func _ready() -> void:
@@ -36,7 +41,14 @@ func _ready() -> void:
 
 	PlayerDataManager.load_data()
 	_create_settings_button()
-	show_main_menu()
+
+	# Auth-driven entry: a stored session opens the dashboard, otherwise the
+	# landing screen. Subsequent sign in/out events swap the active screen.
+	AuthManager.auth_state_changed.connect(_on_auth_state_changed)
+	if AuthManager.has_session():
+		show_dashboard()
+	else:
+		show_landing()
 
 func show_main_menu() -> void:
 	if _settings_layer != null:
@@ -55,12 +67,73 @@ func show_main_menu() -> void:
 	canvas.add_child(menu)
 	menu.game_start_requested.connect(_on_game_start_requested)
 
+# ---------------------------------------------------------------------------
+# Auth / dashboard screens (consolidated frontend)
+# ---------------------------------------------------------------------------
+
+func _on_auth_state_changed(event: String, _session: Dictionary) -> void:
+	if event == "SIGNED_IN":
+		show_dashboard()
+	elif event == "SIGNED_OUT":
+		show_landing()
+
+func show_landing() -> void:
+	var inst = _target()
+	if inst != self:
+		inst.show_landing()
+		return
+	AudioManager.play_music("mainmenu")
+	_show_ui_screen(LANDING_SCENE)
+
+func show_login() -> void:
+	var inst = _target()
+	if inst != self:
+		inst.show_login()
+		return
+	_show_ui_screen(LOGIN_SCENE)
+
+func show_dashboard() -> void:
+	var inst = _target()
+	if inst != self:
+		inst.show_dashboard()
+		return
+	AudioManager.play_music("mainmenu")
+	_show_ui_screen(DASHBOARD_SCENE)
+
+func start_game_from_dashboard() -> void:
+	var inst = _target()
+	if inst != self:
+		inst.start_game_from_dashboard()
+		return
+	_on_game_start_requested(Globals.selected_character)
+
+func _show_ui_screen(scene_path: String) -> Node:
+	_clear_ui_layers()
+	if _settings_layer != null:
+		_settings_layer.visible = false
+	var canvas := CanvasLayer.new()
+	canvas.layer = 10
+	add_child(canvas)
+	_ui_layer = canvas
+	var screen: Node = load(scene_path).instantiate()
+	canvas.add_child(screen)
+	return screen
+
+# Frees the current UI overlay. Tracked by reference (not node name) because a
+# freshly added same-named CanvasLayer would be auto-renamed by Godot while the
+# previous one is still pending free, which previously left stale screens up.
+func _clear_ui_layers() -> void:
+	if is_instance_valid(_ui_layer):
+		_ui_layer.queue_free()
+	_ui_layer = null
+	var main_menu_layer: Node = get_node_or_null("MainMenuLayer")
+	if main_menu_layer != null:
+		main_menu_layer.queue_free()
+
 func _on_game_start_requested(character: String) -> void:
 	if _settings_layer != null:
 		_settings_layer.visible = true
-	var main_menu_layer: Node = _target().get_node_or_null("MainMenuLayer")
-	if main_menu_layer != null:
-		main_menu_layer.queue_free()
+	_clear_ui_layers()
 
 	Globals.selected_character = character
 
@@ -109,7 +182,8 @@ func return_to_main_menu() -> void:
 	if target.player != null:
 		target.player.queue_free()
 	target.player = null
-	show_main_menu()
+	# Consolidated app returns to the dashboard instead of the old main menu.
+	show_dashboard()
 
 func get_player() -> Node:
 	return _target().player

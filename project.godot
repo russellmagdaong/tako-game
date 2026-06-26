@@ -15,6 +15,12 @@ run/main_scene="res://scenes/core/game_manager.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[tako]
+
+supabase/url="https://vkpbfelzxhuksjcbksae.supabase.co"
+supabase/anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJmZWx6eGh1a3NqY2Jrc2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjA0MDQsImV4cCI6MjA5NzkzNjQwNH0.8WxEqPTReYOToMabEsWIy0NT0lE9goJS_OfvrQcMYAg"
+gemini/model="gemini-2.5-flash"
+
 [autoload]
 
 GameLogger="*res://scripts/core/logger.gd"
@@ -27,6 +33,7 @@ PlayerDataManager="*res://scripts/core/player_data_manager.gd"
 AudioManager="*res://scripts/core/audio_manager.gd"
 ApiClient="*res://scripts/core/api_client.gd"
 DatabaseManager="*res://scripts/SQLite/db_manager.gd"
+AuthManager="*res://scripts/core/auth_manager.gd"
 SupabaseSyncManager="*res://scripts/core/supabase_sync_manager.gd"
 MathManager="*res://scripts/gameplay/math/math_manager.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"

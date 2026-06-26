@@ -103,12 +103,8 @@ func _ready() -> void:
 	elif enabled:
 		GameLogger.info("SupabaseSyncManager: Not configured; set %s and %s to enable sync." % [SUPABASE_URL_SETTING, SUPABASE_ANON_KEY_SETTING])
 
-	call_deferred("_check_deep_link")
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_RESUMED:
-		_check_deep_link()
-
+# The access token now arrives from AuthManager (see configure()); deep-link
+# parsing was removed when the frontend was consolidated into this app.
 func configure(url: String, anon_key: String, access_token: String = "") -> void:
 	supabase_url = url.strip_edges().trim_suffix("/")
 	supabase_anon_key = anon_key.strip_edges()
@@ -290,97 +286,6 @@ func _load_local_config() -> void:
 			ApiClient.active_provider = ApiClient.AiProvider.GEMINI_1_5_FLASH
 	var g_level = config.get("grade_level", 7)
 	Globals.grade_level = int(g_level)
-
-func _check_deep_link() -> void:
-	if OS.get_name() != "Android":
-		return
-	
-	var godot_singleton = Engine.get_singleton("Godot")
-	if not godot_singleton:
-		return
-		
-	var activity = godot_singleton.getAppActivity()
-	if not activity:
-		return
-		
-	var intent = activity.getIntent()
-	if not intent:
-		return
-		
-	var data_uri: String = intent.getDataString()
-	if data_uri.is_empty():
-		return
-		
-	GameLogger.info("SupabaseSyncManager: Found launch intent URI: %s" % data_uri)
-	_parse_and_apply_deep_link(data_uri)
-	intent.setData(null)
-
-func _parse_and_apply_deep_link(uri: String) -> void:
-	if not uri.contains("?"):
-		return
-		
-	var query_part = uri.split("?", true, 1)[1]
-	var params_list = query_part.split("&")
-	
-	var params := {}
-	for param in params_list:
-		if not param.contains("="):
-			continue
-		var parts = param.split("=", true, 1)
-		params[parts[0]] = parts[1]
-		
-	var u_id = params.get("user_id", "")
-	var token = params.get("access_token", "")
-	var gemini_key = params.get("gemini_key", "")
-	var grade_level_str = params.get("grade_level", "")
-	
-	if not u_id.is_empty():
-		PlayerDataManager.user_id = u_id
-		GameLogger.info("SupabaseSyncManager: Configured user_id from deep link: %s" % u_id)
-		
-	if not token.is_empty():
-		supabase_access_token = token
-		GameLogger.info("SupabaseSyncManager: Configured access_token from deep link.")
-		
-	if not gemini_key.is_empty():
-		ApiClient.gemini_api_key = gemini_key
-		if not Engine.has_singleton(ApiClient.gemini_nano_plugin_name):
-			ApiClient.active_provider = ApiClient.AiProvider.GEMINI_1_5_FLASH
-			GameLogger.info("SupabaseSyncManager: Configured gemini_api_key and switched provider to GEMINI_1_5_FLASH.")
-		else:
-			GameLogger.info("SupabaseSyncManager: Configured gemini_api_key from deep link, keeping GEMINI_NANO.")
-		
-	if not grade_level_str.is_empty():
-		Globals.grade_level = grade_level_str.to_int()
-		GameLogger.info("SupabaseSyncManager: Configured grade_level from deep link: %s" % grade_level_str)
-		
-	_save_local_config(u_id, token, gemini_key, grade_level_str)
-	sync_now()
-
-func _save_local_config(p_user_id: String, p_token: String, p_gemini_key: String, p_grade_level: String = "") -> void:
-	var config := {}
-	if FileAccess.file_exists(LOCAL_CONFIG_PATH):
-		var file := FileAccess.open(LOCAL_CONFIG_PATH, FileAccess.READ)
-		if file != null:
-			var json := JSON.new()
-			if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
-				config = json.data
-	
-	config["supabase_url"] = supabase_url
-	config["supabase_anon_key"] = supabase_anon_key
-	if not p_token.is_empty():
-		config["supabase_access_token"] = p_token
-	if not p_user_id.is_empty():
-		config["user_id"] = p_user_id
-	if not p_gemini_key.is_empty():
-		config["gemini_api_key"] = p_gemini_key
-	if not p_grade_level.is_empty():
-		config["grade_level"] = p_grade_level.to_int()
-
-	var write_file := FileAccess.open(LOCAL_CONFIG_PATH, FileAccess.WRITE)
-	if write_file != null:
-		write_file.store_string(JSON.stringify(config))
-		GameLogger.info("SupabaseSyncManager: Saved credentials to local user config.")
 
 func _get_config_value(setting_name: String, env_name: String) -> String:
 	var value := str(ProjectSettings.get_setting(setting_name, ""))

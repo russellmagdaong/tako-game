@@ -22,6 +22,7 @@ const OLLAMA_URL := "http://localhost:11434"
 
 @export var active_provider: AiProvider = AiProvider.OLLAMA
 @export var gemini_api_key: String = ""
+@export var gemini_model: String = "gemini-2.5-flash"
 @export var gemini_nano_plugin_name: String = "GodotGeminiNano"
 @export var ollama_model: String = "gemma3"
 
@@ -32,7 +33,7 @@ var _current_tag: String = ""
 var _nano_plugin: Object = null
 
 func _ready() -> void:
-	_load_env_file()
+	_load_ai_config()
 	_http = HTTPRequest.new()
 	_http.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_http)
@@ -50,28 +51,40 @@ func _ready() -> void:
 		
 	GameLogger.info("AiClient ready — active provider: %s" % AiProvider.keys()[active_provider])
 
-func _load_env_file() -> void:
+func _load_ai_config() -> void:
+	# Project settings take priority because they are bundled into exported
+	# Android/desktop builds; res://.env is only a developer-machine fallback.
+	var model := str(ProjectSettings.get_setting("tako/gemini/model", "")).strip_edges()
+	if not model.is_empty():
+		gemini_model = model
+
+	var key := str(ProjectSettings.get_setting("tako/gemini/api_key", "")).strip_edges()
+	if key.is_empty():
+		key = _read_env_gemini_key()
+
+	if not key.is_empty():
+		gemini_api_key = key
+		# Prefer the on-device Nano plugin when present; otherwise use Flash REST.
+		if not Engine.has_singleton(gemini_nano_plugin_name):
+			active_provider = AiProvider.GEMINI_1_5_FLASH
+
+func _read_env_gemini_key() -> String:
 	var path := "res://.env"
 	if not FileAccess.file_exists(path):
-		return
-		
+		return ""
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return
-		
+		return ""
 	while not file.eof_reached():
 		var line := file.get_line().strip_edges()
 		if line.begins_with("GEMINI_API_KEY"):
 			var parts := line.split("=", true, 1)
 			if parts.size() > 1:
 				var value := parts[1].strip_edges()
-				# Remove potential outer quotes
 				if (value.begins_with('"') and value.ends_with('"')) or (value.begins_with("'") and value.ends_with("'")):
 					value = value.substr(1, value.length() - 2)
-				gemini_api_key = value
-				if not Engine.has_singleton(gemini_nano_plugin_name):
-					active_provider = AiProvider.GEMINI_1_5_FLASH
-				break
+				return value
+	return ""
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -98,24 +111,35 @@ func generate_question(skill_type: String, lang: String = "en") -> void:
 	)
 	_enqueue(prompt, "question_generate")
 
-func generate_feedback(question: String, expected: String, player_answer: String, misconception: String = "", lang: String = "en") -> void:
+func generate_feedback(question: String, expected: String, player_answer: String, misconception: String = "", lang: String = "en", attempt: int = 1) -> void:
 	var lang_instruction := "Write the feedback strictly in English."
 	if lang == "tl":
 		lang_instruction = "Write the feedback strictly in Tagalog (Filipino)."
-		
+
 	var misconception_hint := ""
 	if not misconception.is_empty():
 		var desc_dict = MathManager.get_static_fallback_feedback(misconception, lang)
 		var desc = desc_dict.get("feedback", "")
-		misconception_hint = "The student made this specific mistake: \"%s\". Explain this misconception encouragingly to them.\n" % desc
-		
+		misconception_hint = "Likely misconception: \"%s\".\n" % desc
+
+	# Escalate guidance with each failed attempt so feedback feels responsive,
+	# not repetitive, and reacts to the player's actual answer.
+	var attempt_instruction := ""
+	if attempt <= 1:
+		attempt_instruction = "This is their first attempt. Briefly point out, based on their specific answer, where their reasoning likely went wrong and nudge them toward the right approach.\n"
+	elif attempt == 2:
+		attempt_instruction = "This is their SECOND attempt and they are still stuck. Do not repeat generic advice — analyse what their answer of '%s' shows about their thinking and walk them through the FIRST concrete step of the correct method.\n" % player_answer
+	else:
+		attempt_instruction = "This is attempt #%d and they keep struggling. Be very concrete: react to their answer '%s', name the specific operation or step they should do next, and strongly encourage them. Still do NOT state the final answer.\n" % [attempt, player_answer]
+
 	var prompt := (
 		"A student answered a math question incorrectly in a game.\n"
 		+ "Question: %s\n" % question
-		+ "Correct answer: %s\n" % expected
+		+ "Correct answer (do NOT reveal it): %s\n" % expected
 		+ "Student's answer: %s\n" % player_answer
 		+ misconception_hint
-		+ "Write a short, encouraging message (1-2 sentences) explaining their mistake and guiding them to the correct method.\n"
+		+ attempt_instruction
+		+ "Write a short, warm, specific message (1-2 sentences) that clearly reacts to THIS student's answer. Vary your wording each time.\n"
 		+ lang_instruction + "\n"
 		+ "Return ONLY valid JSON: {\"feedback\": \"your message here\"}"
 	)
@@ -159,7 +183,7 @@ func _flush() -> void:
 				_handle_request_error(ERR_UNCONFIGURED)
 				return
 				
-			var url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + gemini_api_key
+			var url := "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s" % [gemini_model, gemini_api_key]
 			var payload := {
 				"contents": [{
 					"parts": [{"text": prompt}]

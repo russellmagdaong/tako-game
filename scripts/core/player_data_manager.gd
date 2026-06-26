@@ -69,6 +69,12 @@ func save_character(character: String) -> void:
 	has_played = true
 	_save_to_database()
 
+func set_player_name(p_name: String) -> void:
+	player_name = p_name.strip_edges()
+	_save_to_database()
+	if _ensure_database_ready():
+		DatabaseManager.save_profile(_ensure_user_id(), player_name, Globals.preferred_language)
+
 func save_progress(level_name: String, position: Vector2 = Vector2.ZERO) -> void:
 	last_level_name = level_name
 	last_position = position
