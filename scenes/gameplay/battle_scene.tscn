@@ -50,6 +50,18 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kholq"]
+bg_color = Color(0.03137255, 0.039215688, 0.050980393, 0.92156863)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.83116955, 0.95413095, 0, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i4ha3"]
 bg_color = Color(0, 0, 0, 0.8117647)
 border_width_left = 5
@@ -306,7 +318,7 @@ anchor_right = 0.63
 anchor_bottom = 0.97
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = ExtResource("3_jxadj")
+theme_override_styles/panel = SubResource("StyleBoxFlat_kholq")
 
 [node name="FeedbackMargin" type="MarginContainer" parent="FeedbackOverlay" unique_id=1773273126]
 layout_mode = 1
@@ -327,6 +339,7 @@ theme_override_font_sizes/font_size = 36
 autowrap_mode = 3
 
 [node name="FeedbackToggle" type="Button" parent="." unique_id=1858950383]
+visible = false
 z_index = 10
 layout_mode = 1
 anchors_preset = -1
