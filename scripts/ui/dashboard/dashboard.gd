@@ -3,10 +3,10 @@ extends Control
 # Decisions applied: no dark mode toggle, no XP. Stats come from local SQLite
 # and PlayerDataManager (no Supabase reads required).
 
-const BG_TOP := Color("0b1430")
-const BG_BOTTOM := Color("17215e")
-const ACCENT := Color("ffd24a")
-const CARD_BG := Color(1, 1, 1, 0.08)
+@export var bg_top: Color = Color("0b1430")
+@export var bg_bottom: Color = Color("17215e")
+@export var accent: Color = Color("ffd24a")
+@export var card_bg: Color = Color(1, 1, 1, 0.08)
 const CHARACTERS := ["playerm", "playerf"]
 const CHARACTER_LABELS := {"playerm": "Boy", "playerf": "Girl"}
 
@@ -94,7 +94,7 @@ func _build_home_panel() -> Control:
 	_profile_name.add_theme_font_size_override("font_size", 30)
 	pbody.add_child(_profile_name)
 	_profile_grade = Label.new()
-	_profile_grade.modulate = ACCENT
+	_profile_grade.modulate = accent
 	pbody.add_child(_profile_grade)
 	vb.add_child(profile)
 
@@ -127,7 +127,7 @@ func _build_home_panel() -> Control:
 	vb.add_child(prog)
 
 	# Continue adventure
-	var cont := _make_button("Continue Adventure", ACCENT, Color("201600"))
+	var cont := _make_button("Continue Adventure", accent, Color("201600"))
 	cont.pressed.connect(func() -> void: GameManager.start_game_from_dashboard())
 	vb.add_child(cont)
 
@@ -145,7 +145,7 @@ func _build_world_panel() -> Control:
 	logo.text = "TAKO"
 	logo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	logo.add_theme_font_size_override("font_size", 80)
-	logo.modulate = ACCENT
+	logo.modulate = accent
 	vb.add_child(logo)
 
 	var desc := Label.new()
@@ -327,8 +327,8 @@ func _user_id() -> String:
 
 func _build_background() -> void:
 	var grad := Gradient.new()
-	grad.set_color(0, BG_TOP)
-	grad.set_color(1, BG_BOTTOM)
+	grad.set_color(0, bg_top)
+	grad.set_color(1, bg_bottom)
 	var tex := GradientTexture2D.new()
 	tex.gradient = grad
 	tex.fill_from = Vector2(0, 0)
@@ -344,7 +344,7 @@ func _build_background() -> void:
 func _make_card() -> PanelContainer:
 	var panel := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = CARD_BG
+	sb.bg_color = card_bg
 	sb.set_corner_radius_all(16)
 	sb.set_content_margin_all(18)
 	panel.add_theme_stylebox_override("panel", sb)
@@ -358,7 +358,7 @@ func _add_stat_card(grid: GridContainer, label_text: String) -> Label:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(360, 120)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = CARD_BG
+	sb.bg_color = card_bg
 	sb.set_corner_radius_all(16)
 	sb.set_content_margin_all(16)
 	panel.add_theme_stylebox_override("panel", sb)
@@ -369,7 +369,7 @@ func _add_stat_card(grid: GridContainer, label_text: String) -> Label:
 	value.text = "0"
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	value.add_theme_font_size_override("font_size", 40)
-	value.modulate = ACCENT
+	value.modulate = accent
 	vb.add_child(value)
 	var caption := Label.new()
 	caption.text = label_text
@@ -390,7 +390,7 @@ func _section_label(text: String) -> Label:
 func _make_cycle_row(title: String, value_text: String) -> Array:
 	var panel := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = CARD_BG
+	sb.bg_color = card_bg
 	sb.set_corner_radius_all(16)
 	sb.set_content_margin_all(14)
 	panel.add_theme_stylebox_override("panel", sb)
@@ -408,7 +408,7 @@ func _make_cycle_row(title: String, value_text: String) -> Array:
 func _make_sound_toggle(title: String, bus_name: String) -> Control:
 	var panel := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = CARD_BG
+	sb.bg_color = card_bg
 	sb.set_corner_radius_all(16)
 	sb.set_content_margin_all(14)
 	panel.add_theme_stylebox_override("panel", sb)
@@ -432,7 +432,7 @@ func _make_sound_toggle(title: String, bus_name: String) -> Control:
 func _make_language_toggle() -> Control:
 	var panel := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = CARD_BG
+	sb.bg_color = card_bg
 	sb.set_corner_radius_all(16)
 	sb.set_content_margin_all(14)
 	panel.add_theme_stylebox_override("panel", sb)
@@ -464,7 +464,7 @@ func _make_tab_button(text: String) -> Button:
 	off.set_corner_radius_all(14)
 	off.set_content_margin_all(10)
 	var on := off.duplicate()
-	on.bg_color = ACCENT
+	on.bg_color = accent
 	btn.add_theme_stylebox_override("normal", off)
 	btn.add_theme_stylebox_override("hover", off)
 	btn.add_theme_stylebox_override("pressed", on)
@@ -480,7 +480,7 @@ func _make_small_button(text: String) -> Button:
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.custom_minimum_size = Vector2(160, 56)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = ACCENT
+	sb.bg_color = accent
 	sb.set_corner_radius_all(12)
 	sb.set_content_margin_all(8)
 	btn.add_theme_stylebox_override("normal", sb)

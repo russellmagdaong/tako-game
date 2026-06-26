@@ -3,9 +3,9 @@ extends Control
 # Two actions: open the login screen, or start an offline guest session.
 # Built programmatically so it is robust to scene-format drift.
 
-const BG_TOP := Color("081027")
-const BG_BOTTOM := Color("0b789f")
-const ACCENT := Color("ffd24a")
+@export var bg_top: Color = Color("081027")
+@export var bg_bottom: Color = Color("0b789f")
+@export var accent: Color = Color("ffd24a")
 
 var _guest_btn: Button
 
@@ -28,7 +28,7 @@ func _ready() -> void:
 
 	vb.add_child(_make_logo())
 
-	var sign_btn := _make_button("Sign In / Sign Up", ACCENT, Color("201600"))
+	var sign_btn := _make_button("Sign In / Sign Up", accent, Color("201600"))
 	sign_btn.pressed.connect(func() -> void: GameManager.show_login())
 	vb.add_child(sign_btn)
 
@@ -50,8 +50,8 @@ func _on_guest_pressed() -> void:
 
 func _build_background() -> void:
 	var grad := Gradient.new()
-	grad.set_color(0, BG_TOP)
-	grad.set_color(1, BG_BOTTOM)
+	grad.set_color(0, bg_top)
+	grad.set_color(1, bg_bottom)
 	var tex := GradientTexture2D.new()
 	tex.gradient = grad
 	tex.fill_from = Vector2(0, 0)
@@ -77,7 +77,7 @@ func _make_logo() -> Control:
 	label.text = "TAKO"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 96)
-	label.modulate = ACCENT
+	label.modulate = accent
 	return label
 
 func _make_button(text: String, bg: Color, fg: Color) -> Button:

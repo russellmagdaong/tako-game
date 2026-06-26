@@ -2,9 +2,9 @@ extends Control
 # Login / sign-up screen. Port of frontend/app/login.tsx.
 # Calls AuthManager; on success GameManager swaps in the dashboard.
 
-const BG_TOP := Color("0b1020")
-const BG_BOTTOM := Color("1b2a6b")
-const ACCENT := Color("ffd24a")
+@export var bg_top: Color = Color("0b1020")
+@export var bg_bottom: Color = Color("1b2a6b")
+@export var accent: Color = Color("ffd24a")
 
 var _mode: String = "signin" # "signin" | "signup"
 
@@ -37,7 +37,7 @@ func _ready() -> void:
 	title.text = "TAKO"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 72)
-	title.modulate = ACCENT
+	title.modulate = accent
 	card.add_child(title)
 
 	var subtitle := Label.new()
@@ -80,7 +80,7 @@ func _ready() -> void:
 	_error_label.visible = false
 	card.add_child(_error_label)
 
-	_submit_btn = _make_button("Sign In", ACCENT, Color("201600"))
+	_submit_btn = _make_button("Sign In", accent, Color("201600"))
 	_submit_btn.pressed.connect(_on_submit)
 	card.add_child(_submit_btn)
 
@@ -140,8 +140,8 @@ func _set_busy(busy: bool) -> void:
 
 func _build_background() -> void:
 	var grad := Gradient.new()
-	grad.set_color(0, BG_TOP)
-	grad.set_color(1, BG_BOTTOM)
+	grad.set_color(0, bg_top)
+	grad.set_color(1, bg_bottom)
 	var tex := GradientTexture2D.new()
 	tex.gradient = grad
 	tex.fill_from = Vector2(0, 0)
@@ -179,7 +179,7 @@ func _make_tab(text: String) -> Button:
 	off.set_corner_radius_all(14)
 	off.set_content_margin_all(10)
 	var on := off.duplicate()
-	on.bg_color = ACCENT
+	on.bg_color = accent
 	btn.add_theme_stylebox_override("normal", off)
 	btn.add_theme_stylebox_override("hover", off)
 	btn.add_theme_stylebox_override("pressed", on)

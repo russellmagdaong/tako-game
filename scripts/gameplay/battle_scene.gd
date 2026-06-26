@@ -10,6 +10,8 @@ var _expected_answer: String = ""
 var _attempt_count: int = 0
 var _skill_type: String = ""
 var _awaiting_ai: bool = false
+var _feedback_overlay: Control
+var _feedback_shown: bool = false
 
 const PLAYER_SPRITE_HEIGHT = 150.0
 const ENEMY_SPRITE_HEIGHT = 200.0
@@ -25,6 +27,7 @@ func _ready() -> void:
 
 	_calc_overlay = get_node("%CalcOverlay")
 	get_node("%CalcToggle").pressed.connect(_on_calc_toggle_pressed)
+	_feedback_overlay = get_node("%FeedbackOverlay")
 
 	_submit_btn.disabled = true
 	_submit_btn.pressed.connect(_on_submit_pressed)
@@ -257,6 +260,9 @@ func _load_battle_texture(folder: String, texture_name: String) -> Texture2D:
 
 func _set_output_text(text: String) -> void:
 	_status_label.text = text
+	if not text.is_empty() and not _feedback_shown:
+		_feedback_shown = true
+		_feedback_overlay.visible = true
 
 const _CALC_LAYOUT: Array = [
 	["sin", "cos", "tan", "^",  "π"],
