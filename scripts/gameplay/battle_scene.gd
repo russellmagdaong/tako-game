@@ -13,6 +13,10 @@ var _awaiting_ai: bool = false
 var _feedback_overlay: Control
 var _feedback_toggle_btn: Button
 var _feedback_shown: bool = false
+var _calc_display: Label
+var _calc_use_btn: Button
+var _run_btn: Button
+var _calc_expr: String = ""
 
 const PLAYER_SPRITE_HEIGHT = 150.0
 const ENEMY_SPRITE_HEIGHT = 200.0
@@ -32,6 +36,14 @@ func _ready() -> void:
 	_feedback_toggle_btn = get_node("%FeedbackToggle")
 	_feedback_toggle_btn.visible = false
 	_feedback_toggle_btn.pressed.connect(_on_feedback_toggle_pressed)
+
+	_calc_display = get_node("%CalcDisplay")
+	if _calc_overlay.has_theme_font_size_override("font_size"):
+		_calc_display.add_theme_font_size_override("font_size", _calc_overlay.get_theme_font_size("font_size"))
+	_calc_use_btn = get_node("%CalcUseButton")
+	_calc_use_btn.pressed.connect(_on_calc_use_pressed)
+	_run_btn = get_node("%RunButton")
+	_run_btn.pressed.connect(_on_run_pressed)
 
 	_submit_btn.disabled = true
 	_submit_btn.pressed.connect(_on_submit_pressed)
@@ -231,11 +243,12 @@ const _CALC_LAYOUT: Array = [
 	["7",   "8",   "9",   "÷",  "⌫"],
 	["4",   "5",   "6",   "*",  "AC"],
 	["1",   "2",   "3",   "-",  "("],
-	["0",   ".",   "x",   "+",  ")"],
+	["0",   ".",   "=",   "+",  ")"],
 ]
 
 func _build_calc_pad() -> void:
 	var grid := get_node("%CalcGrid")
+	var font_size := _calc_overlay.get_theme_font_size("font_size") if _calc_overlay.has_theme_font_size_override("font_size") else 0
 	for row in _CALC_LAYOUT:
 		for symbol: String in row:
 			var btn := Button.new()
@@ -243,23 +256,59 @@ func _build_calc_pad() -> void:
 			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			btn.size_flags_vertical   = Control.SIZE_EXPAND_FILL
 			btn.custom_minimum_size   = Vector2(0, 52)
+			if font_size > 0:
+				btn.add_theme_font_size_override("font_size", font_size)
 			btn.pressed.connect(_on_calc_pressed.bind(symbol))
 			grid.add_child(btn)
 
 func _on_calc_pressed(symbol: String) -> void:
 	match symbol:
 		"⌫":
-			if not _answer_input.text.is_empty():
-				_answer_input.text = _answer_input.text.left(_answer_input.text.length() - 1)
+			if not _calc_expr.is_empty():
+				_calc_expr = _calc_expr.left(_calc_expr.length() - 1)
 		"AC":
-			_answer_input.text = ""
+			_calc_expr = ""
 		"÷":
-			_answer_input.text += "/"
+			_calc_expr += "/"
+		"=":
+			_eval_and_show()
+			return
 		"sin", "cos", "tan":
-			_answer_input.text += symbol + "("
+			_calc_expr += symbol + "("
 		_:
-			_answer_input.text += symbol
-	_answer_input.caret_column = _answer_input.text.length()
+			_calc_expr += symbol
+	_calc_display.text = _calc_expr if not _calc_expr.is_empty() else "0"
+
+func _eval_and_show() -> void:
+	if _calc_expr.is_empty():
+		return
+	var sanitized := _calc_expr.replace("π", str(PI))
+	var expr := Expression.new()
+	if expr.parse(sanitized) != OK:
+		_calc_display.text = "Error"
+		return
+	var result = expr.execute()
+	if expr.has_execute_failed():
+		_calc_display.text = "Error"
+		return
+	var result_str := str(snappedf(float(str(result)), 0.000001))
+	if result_str.ends_with(".0"):
+		result_str = result_str.left(result_str.length() - 2)
+	_calc_display.text = _calc_expr + " = " + result_str
+	_calc_expr = result_str
+
+func _on_calc_use_pressed() -> void:
+	var val := ""
+	if " = " in _calc_display.text:
+		val = _calc_display.text.split(" = ")[-1].strip_edges()
+	elif not _calc_expr.is_empty():
+		val = _calc_expr
+	if not val.is_empty():
+		_answer_input.text = val
+		_answer_input.caret_column = _answer_input.text.length()
+
+func _on_run_pressed() -> void:
+	SceneManager.flee_battle()
 
 func set_problem_text(text: String) -> void:
 	var label = get_node("%ProblemText")

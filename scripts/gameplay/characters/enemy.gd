@@ -65,6 +65,17 @@ func set_defeated() -> void:
 	if state_machine != null:
 		state_machine.change_state("Idle")
 
+func flee_reset() -> void:
+	position = _initial_position
+	if state_machine != null:
+		state_machine.change_state("Idle")
+	var vision_ray := get_node_or_null("VisionRay") as RayCast2D
+	if vision_ray != null:
+		vision_ray.enabled = false
+		await get_tree().create_timer(0.5).timeout
+		if not is_defeated:
+			vision_ray.enabled = true
+
 func _apply_boss_sprites() -> void:
 	# Intentionally swapped: female boss frames shown for male player and vice versa.
 	var frames: SpriteFrames = player_f_boss_frames if Globals.selected_character == "playerm" \

@@ -260,6 +260,36 @@ func end_battle() -> void:
 	if is_final and is_instance_valid(enemy):
 		await _show_final_boss_ending(enemy, is_level_boss)
 
+func flee_battle() -> void:
+	if not is_battling:
+		return
+	is_enemy_approaching = false
+
+	await fade_out()
+
+	if GameManager.instance != null:
+		var canvas := GameManager.instance.get_node_or_null("BattleCanvas")
+		if canvas != null:
+			canvas.queue_free()
+
+	var fled_enemy := battle_enemy
+	battle_enemy = null
+	is_battling = false
+
+	if fled_enemy != null and is_instance_valid(fled_enemy) and fled_enemy.has_method("flee_reset"):
+		fled_enemy.flee_reset()
+
+	await fade_in()
+	AudioManager.play_music_for_level(str(current_level.name) if current_level != null else "")
+
+	var player_node = GameManager.get_player()
+	if player_node != null:
+		var input = player_node.get_node_or_null("Input")
+		if input != null and input.direction != Vector2.ZERO:
+			player_node.global_position -= input.direction * Globals.grid_size
+		if current_level != null:
+			PlayerDataManager.save_progress(str(current_level.name), player_node.global_position)
+
 func _award_level_achievement() -> void:
 	if current_level == null:
 		return
