@@ -8,3 +8,13 @@
 *.local
 supabase_config.json
 local_supabase_config.json
+
+# Node dependencies
+node_modules/
+
+# Expo-generated native projects (regenerated from app.json via prebuild)
+/frontend/android/
+/frontend/ios/
+
+# Stray temp binaries
+addons/godot-sqlite/bin/~*

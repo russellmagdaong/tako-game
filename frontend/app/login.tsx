@@ -2,17 +2,70 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useState } from "react";
-import { Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
+import { supabase } from "../utils/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== "web") {
       void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     }
   }, []);
+
+  const handleSubmit = async () => {
+    if (loading) return;
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+    if (!cleanEmail || !cleanPassword) {
+      alert("Please fill in all fields.");
+      return;
+    }
+    if (mode === "signup" && !username.trim()) {
+      alert("Please enter a username.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: cleanPassword,
+        });
+        if (error) {
+          alert("Sign In Error: " + error.message);
+        } else {
+          router.replace("/home");
+        }
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password: cleanPassword,
+          options: {
+            data: {
+              username: username.trim(),
+            },
+          },
+        });
+        if (error) {
+          alert("Sign Up Error: " + error.message);
+        } else {
+          router.replace("/home");
+        }
+      }
+    } catch (err: any) {
+      alert("An unexpected error occurred: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <LinearGradient colors={["#0a1120", "#1f2f9d", "#0d7b9e"]} style={styles.shell}>
@@ -51,6 +104,20 @@ export default function LoginPage() {
               </View>
             </View>
 
+            {mode === "signup" ? (
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Trainer Username</Text>
+                <TextInput
+                  autoCapitalize="words"
+                  placeholder="Trainer Name"
+                  placeholderTextColor="#93a8c6"
+                  style={styles.input}
+                  value={username}
+                  onChangeText={setUsername}
+                />
+              </View>
+            ) : null}
+
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
@@ -59,6 +126,8 @@ export default function LoginPage() {
                 placeholder="trainer@tako.ph"
                 placeholderTextColor="#93a8c6"
                 style={styles.input}
+                value={email}
+                onChangeText={setEmail}
               />
             </View>
 
@@ -69,14 +138,21 @@ export default function LoginPage() {
                 placeholderTextColor="#93a8c6"
                 secureTextEntry
                 style={styles.input}
+                value={password}
+                onChangeText={setPassword}
               />
             </View>
 
             <Pressable
-              onPress={() => router.replace("/home")}
+              disabled={loading}
+              onPress={handleSubmit}
               style={({ pressed }) => [styles.submitButton, pressed && styles.pressed]}
             >
-              <Text style={styles.submitButtonText}>{mode === "signin" ? "Sign In" : "Create Account"}</Text>
+              {loading ? (
+                <ActivityIndicator color="#201600" />
+              ) : (
+                <Text style={styles.submitButtonText}>{mode === "signin" ? "Sign In" : "Create Account"}</Text>
+              )}
             </Pressable>
           </View>
         </View>

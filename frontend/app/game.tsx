@@ -1,13 +1,16 @@
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { useEffect } from "react";
-import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Linking, Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { supabase } from "../utils/supabase";
 
 const routeNodes = ["1", "2", "3", "4", "5"] as const;
 
 export default function GamePlaceholder() {
   const router = useRouter();
+  const { grade } = useLocalSearchParams<{ grade?: string }>();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (Platform.OS === "web") {
@@ -20,6 +23,38 @@ export default function GamePlaceholder() {
       void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
+
+  const handleLaunchGame = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert("You must be logged in to launch the game!");
+        return;
+      }
+      const userId = session.user.id;
+      const accessToken = session.access_token;
+      const geminiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY ?? "";
+      const gradeLevel = grade ? parseInt(grade, 10) : 7;
+
+      const url = `tako://play?user_id=${userId}&access_token=${accessToken}&gemini_key=${geminiKey}&grade_level=${gradeLevel}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        try {
+          await Linking.openURL(url);
+        } catch (linkErr) {
+          alert("Could not launch TAKO. Make sure the game APK is installed and registered for deep links!");
+        }
+      }
+    } catch (err: any) {
+      alert("Error launching game: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <LinearGradient colors={["#0f243d", "#1c5e5f", "#288342"]} style={styles.shell}>
@@ -51,10 +86,21 @@ export default function GamePlaceholder() {
         </View>
 
         <View style={styles.footerPanel}>
-          <Text style={styles.footerTitle}>Game scene coming soon</Text>
+          <Text style={styles.footerTitle}>MathQuest Adventure</Text>
           <Text style={styles.footerCopy}>
-            This route is ready for the playable landscape world map once the game module is added.
+            Press the button below to launch the TAKO game APK and start your story-driven math journey!
           </Text>
+          <Pressable
+            disabled={loading}
+            onPress={handleLaunchGame}
+            style={({ pressed }) => [styles.launchButton, pressed && styles.pressed]}
+          >
+            {loading ? (
+              <ActivityIndicator color="#201600" />
+            ) : (
+              <Text style={styles.launchButtonText}>Launch Game APK</Text>
+            )}
+          </Pressable>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -217,5 +263,21 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.82,
     transform: [{ scale: 0.98 }],
+  },
+  launchButton: {
+    marginTop: 8,
+    minHeight: 44,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#ff7d00",
+    backgroundColor: "#ffd24a",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  launchButtonText: {
+    color: "#201600",
+    fontSize: 14,
+    fontWeight: "900",
   },
 });

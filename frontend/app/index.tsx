@@ -1,17 +1,36 @@
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { useEffect } from "react";
-import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { supabase } from "../utils/supabase";
 
 export default function MainLandingPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== "web") {
       void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     }
   }, []);
+
+  const handlePlayAsGuest = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        alert("Guest login failed: " + error.message);
+      } else {
+        router.replace("/home");
+      }
+    } catch (err: any) {
+      alert("An unexpected error occurred: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <LinearGradient colors={["#081027", "#2430a6", "#0b789f"]} style={styles.shell}>
@@ -23,16 +42,22 @@ export default function MainLandingPage() {
 
           <View style={styles.actionStack}>
             <Pressable
+              disabled={loading}
               onPress={() => router.push("/login")}
               style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
             >
               <Text style={styles.primaryButtonText}>Sign In / Sign Up</Text>
             </Pressable>
             <Pressable
-              onPress={() => router.replace("/home")}
+              disabled={loading}
+              onPress={handlePlayAsGuest}
               style={({ pressed }) => [styles.guestButton, pressed && styles.pressed]}
             >
-              <Text style={styles.guestButtonText}>Play as Guest</Text>
+              {loading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text style={styles.guestButtonText}>Play as Guest</Text>
+              )}
             </Pressable>
           </View>
 

@@ -3,13 +3,24 @@
     "name": "TAKO Frontend",
     "slug": "tako-frontend",
     "scheme": "takofrontend",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "orientation": "default",
     "userInterfaceStyle": "automatic",
-    "assetBundlePatterns": ["**/*"],
-    "plugins": ["expo-router"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-router"
+    ],
     "web": {
       "bundler": "metro"
+    },
+    "android": {
+      "package": "com.anonymous.takofrontend"
     }
   }
 }

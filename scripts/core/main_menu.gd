@@ -52,3 +52,12 @@ func _on_settings_pressed() -> void:
 func _on_character_selected(character: String) -> void:
 	PlayerDataManager.save_character(character)
 	game_start_requested.emit(character)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		exit_to_dashboard()
+
+func exit_to_dashboard() -> void:
+	GameLogger.info("MainMenu: Triggering deep link back to Expo dashboard...")
+	OS.shell_open("tako-dashboard://home?refresh=true")
+	get_tree().quit()

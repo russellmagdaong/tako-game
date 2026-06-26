@@ -55,101 +55,243 @@ func get_static_fallback_question(lang: String) -> Dictionary:
 	match q_id:
 		"g7_arithmetic_add_negative":
 			if lang == "tl":
-				question_text = "I-evaluate ang sum: %d + (%d) = ?" % [active_params.x, active_params.y]
+				var opts := [
+					"I-evaluate ang sum: %d + (%d) = ?",
+					"Hanapin ang halaga ng: %d + (%d) = ________",
+					"Hanapin ang sum: %d + (%d) = ________",
+					"Kalkulahin ang expression: %d + (%d) = ?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x, active_params.y]
 				hint_text = "Tandaan, ang pagdadagdag ng negatibong numero ay parang pagbabawas."
 			else:
-				question_text = "Evaluate the sum: %d + (%d) = ?" % [active_params.x, active_params.y]
+				var opts := [
+					"Evaluate the sum: %d + (%d) = ?",
+					"Find the value of: %d + (%d) = ________",
+					"Find the sum: %d + (%d) = ________",
+					"Calculate the expression: %d + (%d) = ?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x, active_params.y]
 				hint_text = "Remember, adding a negative number is the same as subtracting its absolute value."
 		"g7_rational_simplify":
 			if lang == "tl":
-				question_text = "I-simplify ang fraction na %d/%d sa pinakamababang anyo." % [active_params.x, active_params.y]
+				var opts := [
+					"I-simplify ang fraction na %d/%d sa pinakamababang anyo.",
+					"I-reduce ang fraction na %d/%d sa lowest terms.",
+					"Ano ang pinakasimpleng anyo ng fraction na %d/%d?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x, active_params.y]
 				hint_text = "Hatiin ang parehong numerator at denominator sa kanilang Greatest Common Divisor (GCD)."
 			else:
-				question_text = "Simplify the fraction %d/%d to its simplest form." % [active_params.x, active_params.y]
+				var opts := [
+					"Simplify the fraction %d/%d to its simplest form.",
+					"Reduce the fraction %d/%d to its lowest terms.",
+					"What is the simplified form of the fraction %d/%d?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x, active_params.y]
 				hint_text = "Divide both the numerator and the denominator by their Greatest Common Divisor (GCD)."
 		"g7_decimal_to_fraction":
 			if lang == "tl":
-				question_text = "I-convert ang decimal na %.2f sa fraction sa pinakamababang anyo." % active_params.dec
+				var opts := [
+					"I-convert ang decimal na %.2f sa fraction sa pinakamababang anyo.",
+					"Isulat ang decimal na %.2f bilang fraction sa lowest terms.",
+					"I-express ang decimal na %.2f sa anyong fraction."
+				]
+				question_text = opts[randi() % opts.size()] % active_params.dec
 				hint_text = "Isulat ang decimal sa ibabaw ng kapangyarihan ng 10 at i-simplify (halimbawa, 0.25 ay naging 25/100)."
 			else:
-				question_text = "Convert the decimal %.2f to a fraction in its simplest form." % active_params.dec
+				var opts := [
+					"Convert the decimal %.2f to a fraction in its simplest form.",
+					"Write the decimal %.2f as a fraction in its lowest terms.",
+					"Express the decimal %.2f as a fraction in simplest form."
+				]
+				question_text = opts[randi() % opts.size()] % active_params.dec
 				hint_text = "Write the decimal over a power of 10 and simplify (e.g. 0.25 becomes 25/100)."
 		"g7_algebra_linear_simple":
 			if lang == "tl":
-				question_text = "Hanapin ang halaga ng x sa equation: x + %d = %d" % [active_params.a, active_params.b]
+				var opts := [
+					"Hanapin ang halaga ng x sa equation: x + %d = %d",
+					"Lutasin para sa x: x + %d = %d",
+					"Anong value ng x ang makapaglulutas sa equation na x + %d = %d?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b]
 				hint_text = "Ibawas ang %d sa magkabilang panig ng equation upang maiwan ang x." % active_params.a
 			else:
-				question_text = "Find the value of x in the equation: x + %d = %d" % [active_params.a, active_params.b]
+				var opts := [
+					"Find the value of x in the equation: x + %d = %d",
+					"Solve for x: x + %d = %d",
+					"What value of x satisfies the equation: x + %d = %d?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b]
 				hint_text = "Subtract %d from both sides of the equation to isolate x." % active_params.a
 		"g7_geometry_perimeter_rect":
 			if lang == "tl":
-				question_text = "Ang isang parihaba ay may haba na %d cm at lapad na %d cm. Ano ang perimeter nito?" % [active_params.l, active_params.w]
+				var opts := [
+					"Ang isang parihaba ay may haba na %d cm at lapad na %d cm. Ano ang perimeter nito?",
+					"Hanapin ang perimeter ng isang parihaba na may habang %d cm at lapad na %d cm.",
+					"Kalkulahin ang perimeter ng isang %d cm at %d cm na parihaba."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.l, active_params.w]
 				hint_text = "Gamitin ang formula: Perimeter = 2 * (haba + lapad)."
 			else:
-				question_text = "A rectangle has a length of %d cm and a width of %d cm. What is its perimeter?" % [active_params.l, active_params.w]
+				var opts := [
+					"A rectangle has a length of %d cm and a width of %d cm. What is its perimeter?",
+					"Find the perimeter of a rectangle with length %d cm and width %d cm.",
+					"Calculate the perimeter of a %d cm by %d cm rectangle."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.l, active_params.w]
 				hint_text = "Use the formula: Perimeter = 2 * (length + width)."
 		"g8_algebra_exponent_mul":
 			if lang == "tl":
-				question_text = "I-simplify ang expression: x^%d * x^%d. Ano ang exponent ng sagot?" % [active_params.a, active_params.b]
+				var opts := [
+					"I-simplify ang expression: x^%d * x^%d. Ano ang exponent ng sagot?",
+					"Hanapin ang exponent kapag pinag-multiply ang: x^%d * x^%d",
+					"Tukuyin ang exponent ng sagot para sa: x^%d * x^%d"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b]
 				hint_text = "Kapag nagpaparami ng kaparehong base, ipag-add ang mga exponent."
 			else:
-				question_text = "Simplify the expression: x^%d * x^%d. What is the exponent of the answer?" % [active_params.a, active_params.b]
+				var opts := [
+					"Simplify the expression: x^%d * x^%d. What is the exponent of the answer?",
+					"Find the exponent when simplifying: x^%d * x^%d",
+					"Determine the final exponent value for: x^%d * x^%d"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b]
 				hint_text = "When multiplying powers with the same base, add their exponents."
 		"g8_algebra_solve_linear":
 			if lang == "tl":
-				question_text = "Lutasin ang equation para sa x: %dx + %d = %d" % [active_params.a, active_params.b, active_params.c]
+				var opts := [
+					"Lutasin ang equation para sa x: %dx + %d = %d",
+					"Hanapin ang halaga ng x sa linear equation: %dx + %d = %d",
+					"Lutasin para sa variable x: %dx + %d = %d"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b, active_params.c]
 				hint_text = "Ibawas muna ang %d sa magkabilang panig, pagkatapos ay i-divide sa %d." % [active_params.b, active_params.a]
 			else:
-				question_text = "Solve the equation for x: %dx + %d = %d" % [active_params.a, active_params.b, active_params.c]
+				var opts := [
+					"Solve the equation for x: %dx + %d = %d",
+					"Find the value of x in the linear equation: %dx + %d = %d",
+					"Solve for the variable x: %dx + %d = %d"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b, active_params.c]
 				hint_text = "Subtract %d from both sides first, then divide by %d." % [active_params.b, active_params.a]
 		"g8_geometry_slope":
 			if lang == "tl":
-				question_text = "Ano ang slope ng linya na dumadaan sa mga puntos na (%d, %d) at (%d, %d)?" % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
+				var opts := [
+					"Ano ang slope ng linya na dumadaan sa mga puntos na (%d, %d) at (%d, %d)?",
+					"Kalkulahin ang slope ng linya na nag-uugnay sa mga puntos na (%d, %d) at (%d, %d).",
+					"Hanapin ang gradient o slope sa pagitan ng (%d, %d) at (%d, %d)."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
 				hint_text = "Gamitin ang formula ng slope: m = (y2 - y1) / (x2 - x1)."
 			else:
-				question_text = "What is the slope of the line passing through points (%d, %d) and (%d, %d)?" % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
+				var opts := [
+					"What is the slope of the line passing through points (%d, %d) and (%d, %d)?",
+					"Calculate the slope of the line connecting points (%d, %d) and (%d, %d).",
+					"Find the gradient or slope between the points (%d, %d) and (%d, %d)."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
 				hint_text = "Use the slope formula: m = (y2 - y1) / (x2 - x1)."
 		"g9_algebra_discriminant":
 			if lang == "tl":
-				question_text = "Hanapin ang discriminant ng quadratic equation na ito: x² + %dx + %d = 0" % [active_params.b, active_params.c]
+				var opts := [
+					"Hanapin ang discriminant ng quadratic equation na ito: x² + %dx + %d = 0",
+					"Kalkulahin ang discriminant ng quadratic equation na x² + %dx + %d = 0",
+					"Ano ang halaga ng discriminant para sa equation na x² + %dx + %d = 0?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.b, active_params.c]
 				hint_text = "Gamitin ang formula: Discriminant = b² - 4ac. Dito, a = 1, b = %d, at c = %d." % [active_params.b, active_params.c]
 			else:
-				question_text = "Find the discriminant of the quadratic equation: x² + %dx + %d = 0" % [active_params.b, active_params.c]
+				var opts := [
+					"Find the discriminant of the quadratic equation: x² + %dx + %d = 0",
+					"Calculate the discriminant of the quadratic equation: x² + %dx + %d = 0",
+					"What is the value of the discriminant for: x² + %dx + %d = 0?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.b, active_params.c]
 				hint_text = "Use the formula: Discriminant = b² - 4ac. Here, a = 1, b = %d, and c = %d." % [active_params.b, active_params.c]
 		"g9_geometry_distance_points":
 			if lang == "tl":
-				question_text = "Ano ang distansya sa pagitan ng mga puntos na (%d, %d) at (%d, %d)?" % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
+				var opts := [
+					"Ano ang distansya sa pagitan ng mga puntos na (%d, %d) at (%d, %d)?",
+					"Kalkulahin ang distansya ng dalawang puntos na (%d, %d) at (%d, %d).",
+					"Hanapin ang haba ng line segment na nagkokonekta sa (%d, %d) at (%d, %d)."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
 				hint_text = "Gamitin ang Distance Formula: d = sqrt((x2 - x1)² + (y2 - y1)²)."
 			else:
-				question_text = "What is the distance between points (%d, %d) and (%d, %d)?" % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
+				var opts := [
+					"What is the distance between points (%d, %d) and (%d, %d)?",
+					"Calculate the distance between the two points (%d, %d) and (%d, %d).",
+					"Find the length of the line segment connecting (%d, %d) and (%d, %d)."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.x1, active_params.y1, active_params.x2, active_params.y2]
 				hint_text = "Use the Distance Formula: d = sqrt((x2 - x1)² + (y2 - y1)²)."
 		"g9_algebra_direct_variation":
 			if lang == "tl":
-				question_text = "Kung ang y ay direktang nagbabago kasabay ng x, at y = %d kapag x = %d, ano ang y kapag x = %d?" % [active_params.y1, active_params.x1, active_params.x2]
+				var opts := [
+					"Kung ang y ay direktang nagbabago kasabay ng x, at y = %d kapag x = %d, ano ang y kapag x = %d?",
+					"Ang y ay direktang proporsyonal sa x. Kung y = %d kapag x = %d, hanapin ang y kapag x = %d.",
+					"Lutasin para sa y kung ang y ay nagbabago direktang kasabay ng x, at y = %d kapag x = %d (hanapin para sa x = %d)."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.y1, active_params.x1, active_params.x2]
 				hint_text = "Hanapin muna ang variation constant k = y/x, pagkatapos ay gamitin ang y = k * x."
 			else:
-				question_text = "If y varies directly as x, and y = %d when x = %d, what is y when x = %d?" % [active_params.y1, active_params.x1, active_params.x2]
+				var opts := [
+					"If y varies directly as x, and y = %d when x = %d, what is y when x = %d?",
+					"The variable y is directly proportional to x. If y = %d when x = %d, find y when x = %d.",
+					"Solve for y if y varies directly with x, where y = %d when x = %d (find for x = %d)."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.y1, active_params.x1, active_params.x2]
 				hint_text = "Find the variation constant k = y/x first, then use y = k * x."
 		"g10_statistics_median":
 			if lang == "tl":
-				question_text = "Hanapin ang median ng data set na ito: %d, %d, %d, %d, %d" % [active_params.a, active_params.b, active_params.c, active_params.d, active_params.e]
+				var opts := [
+					"Hanapin ang median ng data set na ito: %d, %d, %d, %d, %d",
+					"Tukuyin ang median value ng sumusunod na set ng mga numero: %d, %d, %d, %d, %d",
+					"Ano ang median ng sumusunod na naka-sort na grupo ng data: %d, %d, %d, %d, %d?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b, active_params.c, active_params.d, active_params.e]
 				hint_text = "Ayusin ang mga numero mula sa pinakamaliit hanggang pinakamalaki at hanapin ang gitnang numero."
 			else:
-				question_text = "Find the median of the following ordered data set: %d, %d, %d, %d, %d" % [active_params.a, active_params.b, active_params.c, active_params.d, active_params.e]
+				var opts := [
+					"Find the median of the following ordered data set: %d, %d, %d, %d, %d",
+					"Determine the median value of the following numbers: %d, %d, %d, %d, %d",
+					"What is the median of this data group: %d, %d, %d, %d, %d?"
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.a, active_params.b, active_params.c, active_params.d, active_params.e]
 				hint_text = "Identify the middle value in the sorted list of numbers."
 		"g10_geometry_circumference":
 			if lang == "tl":
-				question_text = "Ano ang circumference ng isang bilog na may radius na %d cm? (Gamitin ang pi = 22/7)" % active_params.r
+				var opts := [
+					"Ano ang circumference ng isang bilog na may radius na %d cm? (pi = 22/7)",
+					"Kalkulahin ang circumference ng bilog na may radius na %d cm. (Gamitin ang pi = 22/7)",
+					"Hanapin ang circumference ng bilog na may radius na %d cm gamit ang pi = 22/7."
+				]
+				question_text = opts[randi() % opts.size()] % active_params.r
 				hint_text = "Gamitin ang formula: Circumference = 2 * pi * r."
 			else:
-				question_text = "What is the circumference of a circle with radius %d cm? (Use pi = 22/7)" % active_params.r
+				var opts := [
+					"What is the circumference of a circle with radius %d cm? (Use pi = 22/7)",
+					"Calculate the circumference of a circle whose radius is %d cm. (Use pi = 22/7)",
+					"Find the circumference of a circle with radius %d cm using pi = 22/7."
+				]
+				question_text = opts[randi() % opts.size()] % active_params.r
 				hint_text = "Use the formula: Circumference = 2 * pi * r."
 		"g10_probability_bag":
 			if lang == "tl":
-				question_text = "Ang isang bag ay naglalaman ng %d pulang bola at %d asul na bola. Ano ang probability na makakuha ng asul na bola sa random na bunot?" % [active_params.r, active_params.b]
+				var opts := [
+					"Ang isang bag ay naglalaman ng %d pulang bola at %d asul na bola. Ano ang probability na makakuha ng asul na bola sa random na bunot?",
+					"May %d pulang bola at %d asul na bola sa isang bag. Ano ang probability na makabunot ng asul na bola?",
+					"Kalkulahin ang probability na makakuha ng asul na bola mula sa bag na may %d pulang bola at %d asul na bola."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.r, active_params.b]
 				hint_text = "Probability = (bilang ng asul na bola) / (kabuuang bilang ng mga bola)."
 			else:
-				question_text = "A bag contains %d red balls and %d blue balls. What is the probability of drawing a blue ball at random?" % [active_params.r, active_params.b]
+				var opts := [
+					"A bag contains %d red balls and %d blue balls. What is the probability of drawing a blue ball at random?",
+					"There are %d red balls and %d blue balls in a bag. What is the probability of drawing a blue ball?",
+					"Calculate the probability of drawing a blue ball from a bag containing %d red and %d blue balls."
+				]
+				question_text = opts[randi() % opts.size()] % [active_params.r, active_params.b]
 				hint_text = "Probability = (number of blue balls) / (total number of balls)."
 		_:
 			if lang == "tl":
@@ -246,9 +388,38 @@ func get_static_fallback_feedback(misconception: String, lang: String) -> Dictio
 			else:
 				msg = "Incorrect. You calculated the probability of drawing a red ball. The question asks for a blue ball. Try again!"
 		_:
-			if lang == "tl":
-				msg = "Mali ang sagot. Pakisuri ang iyong solusyon at subukan ulit."
-			else:
-				msg = "Incorrect answer. Please check your steps and try again."
+			# Determine skill-specific hint for general incorrect answers
+			var skill = active_template.get("skill_type", "")
+			match skill:
+				"BasicArithmetic":
+					if lang == "tl":
+						msg = "Mali ang sagot. Suriin ang mga signs ng mga numero. Ang pagdadagdag ng negatibong numero ay parang pagbabawas."
+					else:
+						msg = "Incorrect. Check the signs of the numbers. Remember that adding a negative number is equivalent to subtraction."
+				"Fractions":
+					if lang == "tl":
+						msg = "Mali ang sagot. Siguraduhing na-simplify mo ang fraction sa pinakamababang anyo sa pamamagitan ng paghahati sa GCD."
+					else:
+						msg = "Incorrect. Make sure you simplified the fraction to its lowest terms by dividing both parts by their GCD."
+				"Algebra":
+					if lang == "tl":
+						msg = "Mali ang sagot. Subukang ihiwalay ang variable x sa pamamagitan ng paggawa ng kabaligtarang operasyon sa magkabilang panig."
+					else:
+						msg = "Incorrect. Try to isolate the variable x by performing the inverse operation on both sides of the equation."
+				"Geometry":
+					if lang == "tl":
+						msg = "Mali ang sagot. Double-check ang formula na ginamit mo (perimeter, circumference, o distansya) at ang iyong kalkulasyon."
+					else:
+						msg = "Incorrect. Double-check the formula you used (perimeter, circumference, or distance) and your arithmetic."
+				"Statistics":
+					if lang == "tl":
+						msg = "Mali ang sagot. Suriin ang iyong kalkulasyon at tiyaking sinunod mo ang tamang paraan para sa median o probability."
+					else:
+						msg = "Incorrect. Review your calculations and ensure you followed the correct steps for median or probability."
+				_:
+					if lang == "tl":
+						msg = "Mali ang sagot. Pakisuri ang iyong solusyon at subukan ulit."
+					else:
+						msg = "Incorrect answer. Please check your steps and try again."
 				
 	return {"feedback": msg}

@@ -7,13 +7,49 @@ class_name QuestionTemplates
 
 static func get_template_for_skill(skill_type: String) -> Dictionary:
 	var list := get_all_templates()
+	var current_grade := 7 # default fallback
+	
+	# Determine current grade from SceneManager level name, or fallback to Globals.grade_level
+	if SceneManager != null and SceneManager.current_level != null:
+		var lvl_name = SceneManager.current_level.name
+		if "Grade7" in lvl_name:
+			current_grade = 7
+		elif "Grade8" in lvl_name:
+			current_grade = 8
+		elif "Grade9" in lvl_name:
+			current_grade = 9
+		elif "Grade10" in lvl_name:
+			current_grade = 10
+		else:
+			current_grade = Globals.grade_level
+	else:
+		current_grade = Globals.grade_level
+		
 	var matches: Array[Dictionary] = []
-	for t in list:
-		if t["skill_type"] == skill_type:
-			matches.append(t)
-			
+	
+	# If skill_type is the default "BasicArithmetic", we want to allow any template
+	# from the current grade level for maximum variety, acting as a general review.
+	# Otherwise, we specifically search for templates matching both current grade and skill_type.
+	if skill_type != "BasicArithmetic":
+		for t in list:
+			if t["grade"] == current_grade and t["skill_type"] == skill_type:
+				matches.append(t)
+				
+	# Fallback/General case: pick any template from the current grade
+	if matches.is_empty():
+		for t in list:
+			if t["grade"] == current_grade:
+				matches.append(t)
+				
+	# If still empty (e.g., grade level has no templates), fallback to matching just skill_type
+	if matches.is_empty():
+		for t in list:
+			if t["skill_type"] == skill_type:
+				matches.append(t)
+				
 	if matches.is_empty():
 		return list[0]
+		
 	return matches[randi() % matches.size()]
 
 static func get_all_templates() -> Array[Dictionary]:

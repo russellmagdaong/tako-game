@@ -45,7 +45,8 @@ func _ready() -> void:
 			_nano_plugin.connect("content_generated", _on_nano_content_generated)
 		if _nano_plugin.has_signal("generation_failed"):
 			_nano_plugin.connect("generation_failed", _on_nano_generation_failed)
-		GameLogger.info("ApiClient: Gemini Nano Android plugin singleton detected and connected.")
+		active_provider = AiProvider.GEMINI_NANO
+		GameLogger.info("ApiClient: Gemini Nano Android plugin singleton detected and connected. Switched provider to GEMINI_NANO.")
 		
 	GameLogger.info("AiClient ready — active provider: %s" % AiProvider.keys()[active_provider])
 
@@ -68,6 +69,8 @@ func _load_env_file() -> void:
 				if (value.begins_with('"') and value.ends_with('"')) or (value.begins_with("'") and value.ends_with("'")):
 					value = value.substr(1, value.length() - 2)
 				gemini_api_key = value
+				if not Engine.has_singleton(gemini_nano_plugin_name):
+					active_provider = AiProvider.GEMINI_1_5_FLASH
 				break
 
 # ---------------------------------------------------------------------------
@@ -85,12 +88,13 @@ func generate_question(skill_type: String, lang: String = "en") -> void:
 		lang_instruction = "Write the question and hint strictly in Tagalog (Filipino)."
 		
 	var prompt := (
-		"You are a friendly, in-character math companion.\n"
-		+ "Based on these parameters, construct a short, fun math question:\n"
+		"You are a creative, friendly math companion.\n"
+		+ "Your task is to transform the mathematical base specifications below into a fun, uniquely structured math question. Do NOT repeat the same sentence patterns. Mix up the phrasings extensively: sometimes use direct questions (e.g. 'Solve this:', 'Evaluate the expression:', 'Find the sum of:', 'What is the value of:', etc.), sometimes write story-driven word problems, and sometimes write a short dialogue with a character asking the player. Avoid rigid formats.\n"
+		+ "Base specifications:\n"
 		+ "%s\n" % prompt_instructions
 		+ lang_instruction + "\n"
 		+ "Return ONLY valid JSON with exactly these two fields:\n"
-		+ "{\"question\": \"the creative question text\", \"hint\": \"a helpful hint to guide them\"}"
+		+ "{\"question\": \"your creative, uniquely phrased and structured math question\", \"hint\": \"a helpful hint to guide them\"}"
 	)
 	_enqueue(prompt, "question_generate")
 
@@ -101,7 +105,9 @@ func generate_feedback(question: String, expected: String, player_answer: String
 		
 	var misconception_hint := ""
 	if not misconception.is_empty():
-		misconception_hint = "The student made a specific mistake categorized as: %s.\n" % misconception
+		var desc_dict = MathManager.get_static_fallback_feedback(misconception, lang)
+		var desc = desc_dict.get("feedback", "")
+		misconception_hint = "The student made this specific mistake: \"%s\". Explain this misconception encouragingly to them.\n" % desc
 		
 	var prompt := (
 		"A student answered a math question incorrectly in a game.\n"

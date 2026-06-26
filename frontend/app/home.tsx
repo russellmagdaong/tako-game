@@ -4,6 +4,8 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useMemo, useState } from "react";
 import { LandingScreen } from "../components/LandingScreen";
 import {
+  ActivityIndicator,
+  Linking,
   Platform,
   Pressable,
   SafeAreaView,
@@ -14,6 +16,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { supabase } from "../utils/supabase";
 
 type TabKey = "home" | "world" | "settings";
 type TabIcon = keyof typeof Ionicons.glyphMap;
@@ -34,6 +37,39 @@ export default function TrainerHome() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("home");
   const [username, setUsername] = useState("Trainer Alex");
+  const [launching, setLaunching] = useState(false);
+
+  const handleLaunchGame = async () => {
+    if (launching) return;
+    setLaunching(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert("You must be logged in to launch the game!");
+        return;
+      }
+      const userId = session.user.id;
+      const accessToken = session.access_token;
+      const geminiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || "";
+      const gradeLevel = grade || 7;
+
+      const url = `tako://play?user_id=${userId}&access_token=${accessToken}&gemini_key=${geminiKey}&grade_level=${gradeLevel}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        try {
+          await Linking.openURL(url);
+        } catch (linkErr) {
+          alert("Could not launch TAKO. Make sure the game APK is installed and registered for deep links!");
+        }
+      }
+    } catch (err: any) {
+      alert("Error launching game: " + err.message);
+    } finally {
+      setLaunching(false);
+    }
+  };
   const [draftName, setDraftName] = useState(username);
   const [editingName, setEditingName] = useState(false);
   const [grade, setGrade] = useState(8);
@@ -45,24 +81,125 @@ export default function TrainerHome() {
   const [showLanguageChoices, setShowLanguageChoices] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
 
+  // Live Supabase metrics
+  const [loading, setLoading] = useState(true);
+  const [xp, setXp] = useState(0);
+  const [monstersDefeated, setMonstersDefeated] = useState(0);
+  const [questionsDone, setQuestionsDone] = useState(0);
+  const [accuracy, setAccuracy] = useState(0);
+  const [streak, setStreak] = useState(0);
+
   const avatar = avatarOptions[avatarIndex];
   const firstName = useMemo(() => username.split(" ")[0] || "Trainer", [username]);
+
+  const fetchUserData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Get Profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      if (profile) {
+        setUsername(profile.username || "Player");
+        setDraftName(profile.username || "Player");
+        setLanguage(profile.preferred_language === "fil" ? "Filipino" : "English");
+        setXp(profile.xp || 0);
+      }
+
+      // 2. Get Progress / Grade Level
+      const { data: progList } = await supabase
+        .from("progress")
+        .select("*")
+        .eq("user_id", user.id);
+      
+      if (progList && progList.length > 0) {
+        setGrade(progList[0].grade_level || 8);
+      }
+
+      // 3. Get Player State / Preferences
+      const { data: playerState } = await supabase
+        .from("player_state")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (playerState) {
+        setSoundEffects(playerState.sfx_volume > 0);
+      }
+
+      // 4. Get Monsters Defeated Count
+      const { count: defeatedCount } = await supabase
+        .from("defeated_enemies")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (defeatedCount !== null) {
+        setMonstersDefeated(defeatedCount);
+      }
+
+      // 5. Get Question Attempts & calculate accuracy/streak
+      const { data: attempts } = await supabase
+        .from("question_attempts")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (attempts) {
+        setQuestionsDone(attempts.length);
+        if (attempts.length > 0) {
+          const correct = attempts.filter((a) => a.is_correct).length;
+          setAccuracy(Math.round((correct / attempts.length) * 100));
+
+          let currentStreak = 0;
+          const sorted = [...attempts].sort((a, b) => 
+            new Date(b.attempted_at).getTime() - new Date(a.attempted_at).getTime()
+          );
+          for (const attempt of sorted) {
+            if (attempt.is_correct) {
+              currentStreak++;
+            } else {
+              break;
+            }
+          }
+          setStreak(currentStreak);
+        } else {
+          setAccuracy(0);
+          setStreak(0);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (Platform.OS !== "web") {
       void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     }
+    fetchUserData();
   }, []);
 
-  const saveUsername = () => {
+  const saveUsername = async () => {
     const nextName = draftName.trim();
-
     if (nextName.length > 0) {
       setUsername(nextName);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ username: nextName })
+          .eq("id", user.id);
+        if (error) alert("Failed to update username: " + error.message);
+      }
     } else {
       setDraftName(username);
     }
-
     setEditingName(false);
   };
 
@@ -70,9 +207,66 @@ export default function TrainerHome() {
     setAvatarIndex((current) => (current + 1) % avatarOptions.length);
   };
 
-  const cycleGrade = () => {
-    setGrade((current) => (current >= 10 ? 7 : current + 1));
+  const cycleGrade = async () => {
+    const nextGrade = grade >= 10 ? 7 : grade + 1;
+    setGrade(nextGrade);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { error } = await supabase
+        .from("progress")
+        .upsert({
+          user_id: user.id,
+          subject: "math",
+          grade_level: nextGrade,
+          progression_pct: 0,
+          points: 0,
+        }, { onConflict: "user_id,subject,grade_level" });
+      if (error) alert("Failed to update grade: " + error.message);
+    }
   };
+
+  const handleToggleSound = async (val: boolean) => {
+    setSoundEffects(val);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const vol = val ? 0.5 : 0.0;
+      const { error } = await supabase
+        .from("player_state")
+        .upsert({
+          user_id: user.id,
+          sfx_volume: vol,
+          music_volume: vol,
+        }, { onConflict: "user_id" });
+      if (error) alert("Failed to update sound settings: " + error.message);
+    }
+  };
+
+  const handleSelectLanguage = async (nextLanguage: "English" | "Filipino") => {
+    setLanguage(nextLanguage);
+    setShowLanguageChoices(false);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const langCode = nextLanguage === "Filipino" ? "fil" : "en";
+      const { error } = await supabase
+        .from("profiles")
+        .update({ preferred_language: langCode })
+        .eq("id", user.id);
+      if (error) alert("Failed to update language: " + error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) alert("Logout error: " + error.message);
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.app, darkMode && styles.appDark, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color="#ffd24a" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.app, darkMode && styles.appDark]}>
@@ -93,13 +287,18 @@ export default function TrainerHome() {
             firstName={firstName}
             grade={grade}
             username={username}
+            xp={xp}
+            monstersDefeated={monstersDefeated}
+            questionsDone={questionsDone}
+            accuracy={accuracy}
+            streak={streak}
             onOpenSettings={() => setActiveTab("settings")}
             onOpenWorld={() => setActiveTab("world")}
           />
         ) : null}
 
         {activeTab === "world" ? (
-          <WorldScreen onStart={() => router.push("/game")} />
+          <WorldScreen onStart={handleLaunchGame} />
         ) : null}
 
         {activeTab === "settings" ? (
@@ -115,6 +314,8 @@ export default function TrainerHome() {
             showLanguageChoices={showLanguageChoices}
             soundEffects={soundEffects}
             username={username}
+            xp={xp}
+            monstersDefeated={monstersDefeated}
             onCancelName={() => {
               setDraftName(username);
               setEditingName(false);
@@ -124,15 +325,13 @@ export default function TrainerHome() {
             onCycleGrade={cycleGrade}
             onEditName={() => setEditingName(true)}
             onSaveName={saveUsername}
-            onSelectLanguage={(nextLanguage) => {
-              setLanguage(nextLanguage);
-              setShowLanguageChoices(false);
-            }}
+            onSelectLanguage={handleSelectLanguage}
             onToggleAbout={() => setShowAbout((current) => !current)}
             onToggleDark={setDarkMode}
             onToggleLanguageChoices={() => setShowLanguageChoices((current) => !current)}
             onToggleNotifications={setNotifications}
-            onToggleSound={setSoundEffects}
+            onToggleSound={handleToggleSound}
+            onLogout={handleLogout}
           />
         ) : null}
       </View>
@@ -171,6 +370,11 @@ function HomeScreen({
   firstName,
   grade,
   username,
+  xp,
+  monstersDefeated,
+  questionsDone,
+  accuracy,
+  streak,
   onOpenSettings,
   onOpenWorld,
 }: {
@@ -179,9 +383,18 @@ function HomeScreen({
   firstName: string;
   grade: number;
   username: string;
+  xp: number;
+  monstersDefeated: number;
+  questionsDone: number;
+  accuracy: number;
+  streak: number;
   onOpenSettings: () => void;
   onOpenWorld: () => void;
 }) {
+  const xpPercent = Math.min(Math.round(((xp % 500) / 500) * 100), 100);
+  const areasDone = Math.min(Math.floor(questionsDone / 15), 4);
+  const overallPct = Math.min(Math.round((questionsDone / 60) * 100), 100);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.homeHeader}>
@@ -206,9 +419,9 @@ function HomeScreen({
           </View>
           <Text style={styles.profileRegion}>Volcano Highlands</Text>
           <View style={styles.xpTrack}>
-            <View style={styles.xpFill} />
+            <View style={[styles.xpFill, { width: `${xpPercent}%` }]} />
           </View>
-          <Text style={styles.profileMetric}>340/500 XP</Text>
+          <Text style={styles.profileMetric}>{xp % 500}/500 XP (Total: {xp})</Text>
         </View>
       </View>
 
@@ -220,21 +433,21 @@ function HomeScreen({
 
       <Text style={[styles.sectionTitle, darkMode && styles.textOnDark]}>Your Stats</Text>
       <View style={styles.statsGrid}>
-        <StatCard darkMode={darkMode} label="Monsters Defeated" value="3" marker="X" tone="#ef4444" />
-        <StatCard darkMode={darkMode} label="Questions Done" value="47" marker="Q" tone="#3b82f6" />
-        <StatCard darkMode={darkMode} label="Accuracy" value="78%" marker="O" tone="#22c55e" />
-        <StatCard darkMode={darkMode} label="Streak" value="5" marker="F" tone="#f97316" />
+        <StatCard darkMode={darkMode} label="Monsters Defeated" value={String(monstersDefeated)} marker="X" tone="#ef4444" />
+        <StatCard darkMode={darkMode} label="Questions Done" value={String(questionsDone)} marker="Q" tone="#3b82f6" />
+        <StatCard darkMode={darkMode} label="Accuracy" value={`${accuracy}%`} marker="O" tone="#22c55e" />
+        <StatCard darkMode={darkMode} label="Streak" value={String(streak)} marker="F" tone="#f97316" />
       </View>
 
       <View style={[styles.progressCard, darkMode && styles.cardDark]}>
         <View style={styles.progressHeader}>
           <Text style={[styles.progressTitle, darkMode && styles.textOnDark]}>Overall Progress</Text>
-          <Text style={styles.progressPercent}>25%</Text>
+          <Text style={styles.progressPercent}>{overallPct}%</Text>
         </View>
         <View style={[styles.progressTrack, darkMode && styles.trackDark]}>
-          <View style={styles.progressFill} />
+          <View style={[styles.progressFill, { width: `${overallPct}%` }]} />
         </View>
-        <Text style={[styles.progressNote, darkMode && styles.textMutedDark]}>1 of 4 areas completed</Text>
+        <Text style={[styles.progressNote, darkMode && styles.textMutedDark]}>{areasDone} of 4 areas completed</Text>
       </View>
     </ScrollView>
   );
@@ -256,6 +469,8 @@ function SettingsScreen({
   showLanguageChoices,
   soundEffects,
   username,
+  xp,
+  monstersDefeated,
   onCancelName,
   onChangeAvatar,
   onChangeDraftName,
@@ -268,6 +483,7 @@ function SettingsScreen({
   onToggleLanguageChoices,
   onToggleNotifications,
   onToggleSound,
+  onLogout,
 }: {
   avatar: (typeof avatarOptions)[number];
   darkMode: boolean;
@@ -280,6 +496,8 @@ function SettingsScreen({
   showLanguageChoices: boolean;
   soundEffects: boolean;
   username: string;
+  xp: number;
+  monstersDefeated: number;
   onCancelName: () => void;
   onChangeAvatar: () => void;
   onChangeDraftName: (value: string) => void;
@@ -292,10 +510,11 @@ function SettingsScreen({
   onToggleLanguageChoices: () => void;
   onToggleNotifications: (value: boolean) => void;
   onToggleSound: (value: boolean) => void;
+  onLogout: () => void;
 }) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      <SettingsProfileHeader avatar={avatar} darkMode={darkMode} grade={grade} username={username} />
+      <SettingsProfileHeader avatar={avatar} darkMode={darkMode} grade={grade} username={username} xp={xp} monstersDefeated={monstersDefeated} />
 
       <Text style={[styles.settingsSectionLabel, darkMode && styles.textMutedDark]}>PROFILE</Text>
       <View style={[styles.settingsGroup, darkMode && styles.cardDark]}>
@@ -407,7 +626,7 @@ function SettingsScreen({
         ) : null}
       </View>
 
-      <Pressable style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}>
+      <Pressable onPress={onLogout} style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}>
         <Text style={styles.logoutText}>Log Out</Text>
       </Pressable>
     </ScrollView>
@@ -419,11 +638,15 @@ function SettingsProfileHeader({
   darkMode,
   grade,
   username,
+  xp,
+  monstersDefeated,
 }: {
   avatar: (typeof avatarOptions)[number];
   darkMode: boolean;
   grade: number;
   username: string;
+  xp: number;
+  monstersDefeated: number;
 }) {
   return (
     <View style={[styles.settingsHero, darkMode && styles.settingsHeroDark]}>
@@ -436,15 +659,25 @@ function SettingsProfileHeader({
         <Text style={[styles.settingsHeroMeta, darkMode && styles.textMutedDark]}>
           Volcano Highlands - Grade {grade}
         </Text>
-        <View style={styles.heroStats}>
-          <MiniStat value="340" label="XP" />
-          <MiniStat value="210" label="Coins" />
-          <MiniStat value="3" label="Wins" />
+        <View style={heroStatsStyle.heroStatsOverride}>
+          <MiniStat value={String(xp)} label="XP" />
+          <MiniStat value={String(xp * 2)} label="Coins" />
+          <MiniStat value={String(monstersDefeated)} label="Wins" />
         </View>
       </View>
     </View>
   );
 }
+
+const heroStatsStyle = StyleSheet.create({
+  heroStatsOverride: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 16,
+    paddingHorizontal: 20,
+  }
+});
 
 function PixelAvatar({
   avatar,
