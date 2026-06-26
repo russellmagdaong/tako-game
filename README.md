@@ -1,86 +1,102 @@
 # TAKO — Teaching with Adaptive Knowledge Orchestration
 
----
-
-## Project Overview
-
-TAKO is a mobile-first, offline-first math RPG built in Godot 4 (GDScript) for Android. Players begin as a student having a quiet "midlife crisis" inside a billiard hall — a nod to our team name, Billiard Boys. An AI companion nudges him to stop wasting time and go learn instead. He leaves for school, where he's greeted by **4 doors representing subjects**: Math, Science, Languages, and Philippine History. Only **Math is active** in this prototype — the other three are visibly present but locked, signaling that the architecture is built to scale beyond this hackathon.
-
-Walking through the Math door leads to a hallway with **Grade 7, 8, 9, and 10 choices**, all open from the start — progression is **not gated**, so players can enter any grade in any order and switch freely between them.
-
-Inside a grade's hall, the player encounters "enemies" — each one is a math question scoped to that grade's skill domain. Answering correctly fills a **progression bar** specific to that grade. Answering incorrectly isn't a fail state — the **AI companion explains exactly what went wrong and walks through the correct reasoning**, in whatever language the student is typing in (English or Filipino). Players can **backtrack** past a hard question and return to it later. Reaching 100% in a grade hall unlocks the option to move to another grade/subject or replay questions for review.
-
-The game is built to be genuinely playable with **zero internet connection** — Android's on-device **Gemini Nano** keeps AI feedback running offline — while syncing progress to the cloud whenever a connection is available.
+TAKO is a mobile-first, offline-first educational math RPG built in Godot 4 (GDScript) for Android. The game blends narrative roleplaying elements with a bilingual learning companion that provides adaptive math assistance.
 
 ---
 
-## AI Architecture (Important — Read Before Modifying AI Logic)
+## 1. Project Overview
 
-TAKO deliberately separates **what the AI is trusted to do** from **what stays deterministic**, to avoid hallucinated math and unreliable grading:
+Players start as a student inside a billiard hall (a creative nod to the development team, Billiard Boys). Prompted by an in-game AI companion, the player transitions to a school building featuring **4 locked subject doors**: Mathematics, Science, Languages, and Philippine History. In this prototype, the **Mathematics door is active and unlocked**, demonstrating a highly scalable architecture prepared to receive other subjects.
 
-| Task | Handled by | Why |
+Entering the Mathematics door leads to a grade hall containing classrooms for **Grades 7, 8, 9, and 10**. Progress is **non-gated**—players are free to enter any grade, backtrack from difficult problems, and review lessons in any order. Engaging with obstacles/enemies triggers math questions aligned with the DepEd curriculum. Answering incorrectly triggers personalized AI feedback explaining the mistake in the player's choice of language (English or Tagalog/Filipino).
+
+---
+
+## 2. System Requirements
+
+To install and run the TAKO APK, the following device specifications are required:
+
+* **Game Execution (Minimum)**: Android 10.0 (API Level 29) or higher.
+* **On-Device Offline AI (Gemini Nano)**: Android 14.0 (API Level 34) or higher on supported devices featuring Android AICore services (e.g., Google Pixel 8/9 series, Samsung Galaxy S24 series).
+* **Network Connectivity**: Optional. The game runs fully offline using a local database save state. Progress is automatically synced to the cloud backend whenever an internet connection becomes active.
+
+---
+
+## 3. Core Software Architecture Updates
+
+Recent engineering cycles implemented the following features:
+
+### A. Offline-First SQLite Database Integration
+* Integrated [db_manager.gd](file:///d:/Tako/tako-game/scripts/SQLite/db_manager.gd) as a global Autoload singleton.
+* Configured local schemas on the device (`user://tako.db`) for tracking user profiles, progress, and question attempt logs.
+* Implemented automatic table migrations (mapping integer IDs to text UUIDs) and dirty flags to support seamless syncing to Supabase.
+
+### B. Curriculum-Aligned Question Templates
+* Implemented 14 parameterized, deterministic math templates in [question_templates.gd](file:///d:/Tako/tako-game/scripts/gameplay/math/question_templates.gd) covering Grades 7–10:
+  * **Grade 7**: Basic negative arithmetic, simplifying fractions, decimal-to-fraction conversions, linear equations, rectangle perimeter.
+  * **Grade 8**: Exponent multiplication, multi-step linear equations, linear slopes, systems of linear equations.
+  * **Grade 9**: Quadratic equations, Pythagorean theorem.
+  * **Grade 10**: Mean/median/mode statistics, bag-drawing probability, circle circumference.
+* Every lambda block inside the template definitions is fully parenthesized `(func(): ...)` to resolve GDScript compilation/indentation unindent parsing errors.
+
+### C. Equivalence Answer Validation
+* Created [answer_validator.gd](file:///d:/Tako/tako-game/scripts/gameplay/math/answer_validator.gd) to parse and match equivalent formats, ensuring that equivalent answers (such as fraction `1/2`, decimal `0.5`, or non-simplified fractions like `2/4`) are evaluated as correct.
+
+### D. Dual-Provider Gemini Integration
+* Refactored [api_client.gd](file:///d:/Tako/tako-game/scripts/core/api_client.gd) to support dynamic provider switching:
+  * **Google Gemini 1.5 Flash (Online REST)**: Uses standard HTTPS POST requests to Google's generative developer API when an internet connection is present.
+  * **Google Gemini Nano (Offline JNI)**: Communicates asynchronously via native JNI signals with a Godot Android Plugin (`GodotGeminiNano`) to generate offline feedback on-device.
+  * **Ollama (Local Developer Testing)**: Bypassed on Android builds, this local option remains available solely for debugging in the Godot PC editor.
+
+### E. Secure Environment Key Configuration
+* Added a local [.env](file:///d:/Tako/tako-game/.env) config loader to keep API keys secure during developer testing. The key is parsed on startup and omitted from Git via [.gitignore](file:///d:/Tako/tako-game/.gitignore).
+
+---
+
+## 4. AI & Phrasing Architecture
+
+To avoid hallucinated math grading and incorrect solutions, TAKO separates **math grading logic** from **natural language generation**:
+
+| Layer / Responsibility | Handler | Rationale |
 |---|---|---|
-| **Math correctness** | Deterministic GDScript logic (template-based question generation, computed answers in code) | The AI is never asked "is this right?" — answers are always validated in code, never by a model |
-| **Misconception identification** | Rule-based matching against known wrong-answer patterns per question template | Since questions come from parameterized templates, we already know what a given wrong answer typically indicates (sign error, wrong operation, etc.) — no AI guessing required |
-| **Explanation phrasing** | AI (Claude/GPT online, Gemini Nano offline) | The AI's actual job is taking already-correct facts (what mistake was made, why) and phrasing them as a warm, in-character explanation — never determining the facts itself |
-| **Companion banter / encouragement / milestone reactions** | Mostly scripted/templated dialogue; AI-flavored only where low-stakes | Keeps the companion feeling alive without unnecessary AI calls |
-
-**Two-tier explanation generation:**
-- **Online:** Claude/GPT API generates richer, more natural explanations, mirroring the player's language (English/Filipino) directly — no separate translation step.
-- **Offline:** On-device **Gemini Nano** (via Android ML Kit GenAI / AICore) generates the same explanation from the same pre-determined facts, so the game stays genuinely AI-powered with zero connection — not just AI-when-convenient.
-
-UI text (menus, buttons, labels) is **hardcoded** in English/Tagalog string tables with a manual toggle — no AI involved in UI localization, since that content is static and finite.
-
----
-## Features
-- **Story-driven intro** — billiard hall → school → subject doors → grade hallway, establishing both narrative hook and scalable subject/grade structure
-- **AI-personalized misconception feedback** — wrong answers trigger a targeted explanation of the *specific* mistake made, not a generic "wrong, try again," generated in the player's language (English/Filipino)
-- **Fully offline-first** — local save (SQLite) is the source of truth during play; Gemini Nano provides AI feedback with no internet required; progress syncs to Supabase only when a connection is available
-- **Ungated grade progression** — Grade 7, 8, 9, 10 halls are all open from the start; each tracks its own independent progression %
-- **Backtracking** — players can skip a difficult question and return to it later within a grade hall
-- **Subject scalability (visible, not yet built)** — Science, Languages, and Philippine History doors are present but locked, signaling future expansion
-- **Bilingual companion** — mirrors however the student types (English/Filipino) 
-- **Touch controls** — virtual joystick and interact button auto-shown on Android
----
-
-## Setup Instructions
-
-### Prerequisites
-
-- Android SDK + export templates
-- An Android device running Android 10+ for Gemini Nano on-device AI (availability depends on supported Pixel/Samsung devices)
-- A [Supabase](https://supabase.com) project (Postgres + Auth) for cloud sync
-- An API key for Claude or GPT (online explanation generation)
-
-### Android build (production)
-
-1. In Godot: **Project → Export → Android**
-2. Set your Android SDK path and debug keystore
-3. Click **Export Project**
-4. Install the APK on a supported Android device — Gemini Nano activates automatically; the virtual joystick appears on-screen
-
-### Clearing save data
-
-Open the in-game menu → **Settings** → **Clear Save Data** (tap twice to confirm).
+| **Math Correctness** | Deterministic GDScript | Answers are compared and parsed in code—never by the LLM. |
+| **Misconception Matching** | Rule-Based Templates | Wrong answers are compared to known math errors (e.g., adding denominators directly) before passing metadata to the AI. |
+| **Explanation Phrasing** | Gemini 1.5 Flash / Gemini Nano | The AI takes the verified misconception metadata and phrases it into an encouraging, in-character explanation. |
 
 ---
 
-## Technologies Used
+## 5. Technology Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| **Game engine** | Godot 4.6 (GDScript) | Rendering, scenes, animation, Android export |
-| **Math correctness** | Deterministic GDScript logic | Answer validation and misconception pattern matching — AI is never trusted to grade math or identify mistakes |
-| **Online AI** | Claude / GPT API | Explanation phrasing when connected — richer, fuller natural language, language-mirrored |
-| **Offline AI** | Gemini Nano (Android built-in, via ML Kit GenAI / AICore) | Explanation phrasing when offline — same job as the online tier, run entirely on-device |
-| **Networking** | Godot `HTTPRequest` node | Calls Claude/GPT API and Supabase REST API directly |
-| **Local storage** | Godot SQLite addon (`user://` path) | Offline-first source of truth: progression %, points, question history, per grade |
-| **Cloud backend** | Supabase (Postgres + Auth) | Login, cross-device progress sync, mastery history |
-| **Platform target** | Android (Godot native export) | Primary deployment target |
+* **Game Engine**: Godot Engine 4.6.2 (GDScript)
+* **Local Storage**: Godot SQLite addon
+* **Cloud Storage & Sync**: Supabase (PostgreSQL + REST Auth)
+* **AI Engine**: Gemini 1.5 Flash (Cloud API) & Gemini Nano (Android AICore JNI)
 
 ---
 
-## Team Members and Roles
+## 6. Project Directory Structure
+
+```
+TAKO/
+├── scenes/
+│   ├── core/          # GameManager, SceneManager, MainMenu, CharacterSelect
+│   ├── gameplay/      # BattleScene, DialogueTrigger, Interactable
+│   ├── levels/        # Billiards, School, Grade7-10 Halls
+│   └── ui/            # DialogueBox, PauseMenu, HintsPopup, VirtualControls
+├── scripts/
+│   ├── core/          # Autoloads: ApiClient, GameManager, PlayerDataManager, Globals
+│   ├── gameplay/      # BattleScene, Level loaders, movement animation state machines
+│   │   └── math/      # QuestionTemplates, AnswerValidator, MathManager
+│   └── SQLite/        # db_manager.gd (SQLite database controller)
+├── resources/         # Themes, fonts, tilesets
+├── assets/            # Audio, character sprites, monster frames, backgrounds
+├── .gitignore         # Ignores .godot/ cache and local .env files
+└── project.godot      # Godot engine project registry (Autoloads, input mapping)
+```
+
+---
+
+## 7. Team Members & Roles
 
 **Team Name:** Billiard Boys
 
@@ -90,75 +106,3 @@ Open the in-game menu → **Settings** → **Clear Save Data** (tap twice to con
 | Gilo, Eric Jonhson H. | Backend Developer |
 | Guillermo, Christian P. | UI/UX Designer |
 | Magdaong, Russell D. | Game Developer |
-
----
-
-## Project Structure
-
-```
-TAKO/
-├── scenes/
-│   ├── core/          # GameManager, SceneManager, MainMenu, CharacterSelect
-│   ├── gameplay/      # BattleScene, DialogueTrigger, Interactable
-│   ├── levels/        # Billiards, School, GradeHallway, Grade7-10 Halls
-│   └── ui/            # DialogueBox, PauseMenu, HintsPopup, HintButton, LanguageToggle
-├── scripts/
-│   ├── core/          # Autoloads: ApiClient, GameManager, SceneManager,
-│   │                  #   PlayerDataManager, DialogueManager, AudioManager, Globals
-│   ├── gameplay/      # BattleScene, Characters, Levels, UI
-│   │   ├── characters/# Player, Enemy, Input, Movement, Animation, States
-│   │   └── math/       # QuestionTemplates, AnswerValidator, MisconceptionMatcher
-│   ├── ui/            # VirtualControls (Android touch joystick)
-│   └── utilities/     # StateMachine, State
-├── resources/         # Themes, fonts, tilesets, styleboxes
-├── assets/            # Audio, sprites (characters, enemies, backgrounds, UI)
-└── export_presets.cfg # Android + Web export configurations
-```
-
----
-
-## Battle Flow
-
-```
-Grade Hall → walk into enemy → BattleScene loads
-  │
-  ├─ Deterministic engine generates question for enemy's grade + SkillType,
-  │   computes the correct answer in code
-  ├─ Question shown in Problem Panel
-  │
-  ├─ Player types/selects answer → Submit
-  │     ├─ Correct   → "Correct!" → progression bar updates → enemy defeated
-  │     └─ Incorrect → Misconception identified via rule-based matching
-  │                     → AI (Claude/GPT online, Gemini Nano offline) phrases
-  │                       the explanation in the player's language
-  │                     → player retries (unlimited) or backtracks to another question
-  │
-  └─ All enemies defeated in a grade hall → progression hits 100%
-      → player may move to another grade/subject or replay for review
-```
-
----
-
-## Math Skill Domains (per Grade Hall)
-
-| SkillType | Coverage | Typical Grade Focus |
-|---|---|---|
-| `BasicArithmetic` | Addition, subtraction, multiplication, division | Grade 7 |
-| `Fractions` | Simplifying, comparing, operating on fractions | Grade 7–8 |
-| `Algebra` | Solving for unknowns, expressions, linear equations | Grade 8–9 |
-| `Geometry` | Area, perimeter, angles, coordinate geometry | Grade 9 |
-| `WordProblems` | Applied multi-step reasoning | All grades |
-| `Statistics` | Mean, median, mode, basic probability | Grade 10 |
-
-> Prototype scope: 1–2 strong skill domains per grade hall rather than full curriculum coverage, to keep the hackathon build focused and polished.
-
----
-
-## Data Model (Supabase)
-
-- **`profiles`** — extends `auth.users` with username and `preferred_language` (en/tl)
-- **`progress`** — one row per (user, subject, grade_level): `progression_pct`, `points`
-- **`question_attempts`** — per-attempt log: `question_id`, `is_correct`, `misconception_category` — supports backtracking and future mastery analytics
-- **`subjects`** — lookup table for the 4 doors (`id`, `display_name`, `is_active`) — only `math` is active in this prototype
-
-Row-level security ensures each player can only read/write their own `progress` and `question_attempts` rows.
