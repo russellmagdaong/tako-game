@@ -64,6 +64,8 @@ func _set_bus_volume(bus_name: String, linear: float) -> void:
 		AudioServer.set_bus_volume_db(idx, linear_to_db(linear))
 
 func _populate_achievements() -> void:
+	if not has_node("%AchievementsContainer"):
+		return
 	var container = get_node("%AchievementsContainer")
 	var entry_scene: PackedScene = preload("res://scenes/ui/achievement_entry.tscn")
 	for entry in PlayerDataManager.ACHIEVEMENTS:
