@@ -79,11 +79,24 @@ If the AI is unavailable, deterministic question/feedback templates in `MathMana
 
 ## 6. Setup & Installation
 
-### Prerequisites
+### Option A — Install the prebuilt APK (easiest)
+You don't need Godot or any build tools to play. A ready-to-install **`TAKO.apk`** is provided with the project.
+
+1. Copy `TAKO.apk` to your Android device (or an emulator such as MuMu Player).
+2. Open it and allow installation from unknown sources if prompted.
+3. Launch **TAKO** and tap **Play as Guest** to start immediately, or **Sign In / Sign Up** for a cloud account.
+
+The Supabase and Gemini keys are already bundled in this build, so online accounts, cloud sync, and AI work out of the box (with an internet connection). The game is also fully playable offline.
+
+> Via ADB: `adb install -r TAKO.apk`
+
+### Option B — Run / build from source
+
+#### Prerequisites
 - **Godot Engine 4.6.2** (standard build).
 - For Android export: **Android export templates** (Godot → Editor → Manage Export Templates) and a configured **Android SDK / keystore**.
 
-### Run in the editor
+#### Run in the editor
 1. Clone the repository:
    ```bash
    git clone https://github.com/russellmagdaong/tako-game.git
@@ -98,12 +111,12 @@ If the AI is unavailable, deterministic question/feedback templates in `MathMana
 4. The **Supabase URL and anon key** are already set in `project.godot` under the `[tako]` section. To point at your own project, edit `tako/supabase/url` and `tako/supabase/anon_key`.
 5. Press **F5** to run. You'll land on the title screen — tap **Play as Guest** to start immediately, or **Sign In / Sign Up** for an online account.
 
-### Build the Android APK
+#### Build the Android APK
 1. Project → **Export** → select the **Android** preset (outputs `../TAKO.apk`).
 2. Ensure a debug/release keystore is configured, then **Export Project**.
 3. Install on a device/emulator (e.g., `adb install -r TAKO.apk`).
 
-### Backend (Supabase) setup
+#### Backend (Supabase) setup
 If you use your own Supabase project, the app expects these tables: `profiles`, `progress`, `question_attempts`, `player_state`, `defeated_enemies`, `achievements`, `triggered_dialogues`, `subjects` (column shapes match `TABLE_CONFIG` in [supabase_sync_manager.gd](scripts/core/supabase_sync_manager.gd)).
 
 For online accounts and cloud sync to work:
