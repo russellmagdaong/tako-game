@@ -15,12 +15,6 @@ run/main_scene="res://scenes/core/game_manager.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
-[tako]
-
-supabase/url="https://vkpbfelzxhuksjcbksae.supabase.co"
-supabase/anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJmZWx6eGh1a3NqY2Jrc2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjA0MDQsImV4cCI6MjA5NzkzNjQwNH0.8WxEqPTReYOToMabEsWIy0NT0lE9goJS_OfvrQcMYAg"
-gemini/model="gemini-2.5-flash"
-
 [autoload]
 
 GameLogger="*res://scripts/core/logger.gd"
@@ -93,3 +87,9 @@ rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
+
+[tako]
+
+supabase/url="https://vkpbfelzxhuksjcbksae.supabase.co"
+supabase/anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJmZWx6eGh1a3NqY2Jrc2FlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjA0MDQsImV4cCI6MjA5NzkzNjQwNH0.8WxEqPTReYOToMabEsWIy0NT0lE9goJS_OfvrQcMYAg"
+gemini/model="gemini-2.5-flash"

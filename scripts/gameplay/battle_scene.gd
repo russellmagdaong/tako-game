@@ -11,11 +11,11 @@ var _attempt_count: int = 0
 var _skill_type: String = ""
 var _awaiting_ai: bool = false
 var _feedback_overlay: Control
+var _feedback_toggle_btn: Button
 var _feedback_shown: bool = false
 
 const PLAYER_SPRITE_HEIGHT = 150.0
 const ENEMY_SPRITE_HEIGHT = 200.0
-const BATTLE_TUTORIAL_ID: String = "battle_tutorial"
 
 func _ready() -> void:
 	if Globals.instance != null and Globals.instance.ui_theme != null:
@@ -28,6 +28,10 @@ func _ready() -> void:
 	_calc_overlay = get_node("%CalcOverlay")
 	get_node("%CalcToggle").pressed.connect(_on_calc_toggle_pressed)
 	_feedback_overlay = get_node("%FeedbackOverlay")
+	_feedback_overlay.visible = false
+	_feedback_toggle_btn = get_node("%FeedbackToggle")
+	_feedback_toggle_btn.visible = false
+	_feedback_toggle_btn.pressed.connect(_on_feedback_toggle_pressed)
 
 	_submit_btn.disabled = true
 	_submit_btn.pressed.connect(_on_submit_pressed)
@@ -47,26 +51,6 @@ func _ready() -> void:
 	set_problem_text("Generating question..." if Globals.preferred_language == "en" else "Bumubuo ng tanong...")
 	_set_output_text("")
 	ApiClient.generate_question(_skill_type, Globals.preferred_language)
-
-	call_deferred("_maybe_show_battle_tutorial")
-
-	if OS.is_debug_build():
-		_add_debug_skip_button()
-
-func _add_debug_skip_button() -> void:
-	var btn := Button.new()
-	btn.text = "[DEBUG] Skip"
-	btn.anchor_right = 1.0
-	btn.anchor_left = 1.0
-	btn.anchor_bottom = 1.0
-	btn.anchor_top = 1.0
-	btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	btn.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	btn.offset_left = -160.0
-	btn.offset_top = -60.0
-	btn.modulate = Color(1, 0.4, 0.4)
-	btn.pressed.connect(func(): SceneManager.end_battle())
-	add_child(btn)
 
 func _exit_tree() -> void:
 	if ApiClient.question_generated.is_connected(_on_question_generated):
@@ -146,6 +130,10 @@ func _on_calc_toggle_pressed() -> void:
 	_calc_overlay.visible = not _calc_overlay.visible
 	get_node("%CalcToggle").text = "Calc ▼" if _calc_overlay.visible else "Calc ▲"
 
+func _on_feedback_toggle_pressed() -> void:
+	_feedback_overlay.visible = not _feedback_overlay.visible
+	_feedback_toggle_btn.text = "Help ▼" if _feedback_overlay.visible else "Help ▲"
+
 # ---------------------------------------------------------------------------
 # AI responses
 # ---------------------------------------------------------------------------
@@ -186,36 +174,8 @@ func _on_request_failed(tag: String, code: int) -> void:
 			_set_output_text("Incorrect. Try again!")
 
 # ---------------------------------------------------------------------------
-# Tutorial
-# ---------------------------------------------------------------------------
-
-func _maybe_show_battle_tutorial() -> void:
-	if PlayerDataManager.triggered_dialogues.has(BATTLE_TUTORIAL_ID):
-		return
-	PlayerDataManager.mark_dialogue_triggered(BATTLE_TUTORIAL_ID)
-	var lines: Array = [
-		["Guide", "Welcome to your first math battle!"],
-		["Guide", "A math question will appear in the panel on the right. Read it carefully."],
-		["Guide", "Type your answer in the input field, then press Submit (or hit Enter)."],
-		["Guide", "Use the Calc button to open the calculator if you need it. Good luck!"],
-	]
-	var entries: Array[DialogueEntry] = []
-	for line in lines:
-		var e := DialogueEntry.new()
-		e.speaker_name = line[0]
-		e.text = line[1]
-		entries.append(e)
-	await DialogueManager.show(entries)
-
-# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-func _show_dialogue(speaker: String, text: String) -> void:
-	var e := DialogueEntry.new()
-	e.speaker_name = speaker
-	e.text = text
-	await DialogueManager.show([e])
 
 static func _skill_name(index: int) -> String:
 	var keys := Enums.SkillType.keys()
@@ -263,6 +223,8 @@ func _set_output_text(text: String) -> void:
 	if not text.is_empty() and not _feedback_shown:
 		_feedback_shown = true
 		_feedback_overlay.visible = true
+		_feedback_toggle_btn.visible = true
+		_feedback_toggle_btn.text = "Help ▼"
 
 const _CALC_LAYOUT: Array = [
 	["sin", "cos", "tan", "^",  "π"],

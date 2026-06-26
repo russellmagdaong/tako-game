@@ -1,12 +1,143 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dfxjt4sddrk3r"]
 
-[ext_resource type="Script" path="res://scripts/ui/dashboard/dashboard.gd" id="1"]
+[ext_resource type="Script" uid="uid://bouuqjf8krs0q" path="res://scripts/ui/dashboard/dashboard.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://dxl0ykafegkjr" path="res://resources/ui/ui_theme.tres" id="1_w5vpx"]
 
-[node name="Dashboard" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tabpanel"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0, 0, 0, 0.35)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_off"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 0.06)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_on"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.823529, 0.290196, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="Dashboard" type="Control" unique_id=910682081]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1")
+theme = ExtResource("1_w5vpx")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1471815639]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="RootVBox" type="VBoxContainer" parent="." unique_id=1082757357]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="MarginContainer" parent="RootVBox" unique_id=1678101672]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 8
+
+[node name="GreetingLabel" type="Label" parent="RootVBox/Header" unique_id=1941795189]
+unique_name_in_owner = true
+layout_mode = 2
+theme = ExtResource("1_w5vpx")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 40
+
+[node name="ContentArea" type="MarginContainer" parent="RootVBox" unique_id=1407152255]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("1_w5vpx")
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 8
+
+[node name="TabBar" type="PanelContainer" parent="RootVBox" unique_id=1421955377]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tabpanel")
+
+[node name="TabRow" type="HBoxContainer" parent="RootVBox/TabBar" unique_id=1609788806]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HomeTab" type="Button" parent="RootVBox/TabBar/TabRow" unique_id=1456415388]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 64)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("1_w5vpx")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tab_on")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tab_on")
+toggle_mode = true
+button_pressed = true
+text = "Home"
+
+[node name="WorldTab" type="Button" parent="RootVBox/TabBar/TabRow" unique_id=1849022010]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 64)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("1_w5vpx")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tab_on")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tab_on")
+toggle_mode = true
+text = "World"
+
+[node name="SettingsTab" type="Button" parent="RootVBox/TabBar/TabRow" unique_id=1422386697]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 64)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("1_w5vpx")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tab_on")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tab_on")
+toggle_mode = true
+text = "Settings"

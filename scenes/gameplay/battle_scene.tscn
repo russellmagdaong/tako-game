@@ -2,22 +2,35 @@
 
 [ext_resource type="Script" uid="uid://dq6ctabhmk1pk" path="res://scripts/gameplay/battle_scene.gd" id="1"]
 [ext_resource type="Theme" uid="uid://dxl0ykafegkjr" path="res://resources/ui/ui_theme.tres" id="1_p51gn"]
-[ext_resource type="StyleBox" uid="uid://crtmwjbt0lekw" path="res://resources/battle/editor.tres" id="3_drxpv"]
+[ext_resource type="StyleBox" uid="uid://fsh3ungx0en5" path="res://resources/battle/layout.tres" id="3_jxadj"]
+[ext_resource type="StyleBox" uid="uid://bkjeqjgqurfhi" path="res://resources/battle/buttonlayout.tres" id="4_drxpv"]
 [ext_resource type="FontFile" uid="uid://d0c1d3f552cmr" path="res://resources/fonts/dedicool/Dedicool.ttf" id="4_jxadj"]
-[ext_resource type="StyleBox" uid="uid://dg3wr76mvxop1" path="res://resources/battle/button.tres" id="5_drxpv"]
-[ext_resource type="StyleBox" uid="uid://da8874cojnrke" path="res://resources/battle/editorfocus.tres" id="5_i4ha3"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kholq"]
 content_margin_top = 1.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_drxpv"]
-content_margin_left = 0.0
-bg_color = Color(0, 0, 0, 0.23529412)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jxadj"]
+content_margin_top = 10.0
+bg_color = Color(0.9764706, 0.90588236, 0, 0)
 border_width_left = 5
 border_width_top = 5
 border_width_right = 5
 border_width_bottom = 5
-border_color = Color(0.081, 0.576, 1.038, 1)
+border_color = Color(0.8, 0.8, 0.8, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+expand_margin_left = 4.0
+expand_margin_right = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kr4hl"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(1.0381511, 1.0381511, 1.0381511, 0)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -25,47 +38,29 @@ corner_radius_bottom_left = 5
 expand_margin_left = 8.0
 expand_margin_right = 8.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mhrs4"]
-content_margin_top = 10.0
-bg_color = Color(0.22745098, 0.24705882, 0.24705882, 0.39607844)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_drxpv"]
+bg_color = Color(0, 0, 0, 0.7529412)
 border_width_left = 5
 border_width_top = 5
 border_width_right = 5
 border_width_bottom = 5
-border_color = Color(0, 0.48959473, 0.9081231, 0.20784314)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-expand_margin_left = 4.0
-expand_margin_right = 4.0
+border_color = Color(0.83116955, 0.95413095, 0, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qaiw1"]
-content_margin_top = 10.0
-bg_color = Color(0, 0, 0, 0.74509805)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_color = Color(0.081, 0.576, 1.038, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-expand_margin_left = 4.0
-expand_margin_right = 4.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_smqqk"]
-content_margin_top = 10.0
-bg_color = Color(0.21176471, 0.22745098, 0.22745098, 0.63529414)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i4ha3"]
+bg_color = Color(0, 0, 0, 0.8117647)
 border_width_left = 5
 border_width_top = 5
 border_width_right = 5
 border_width_bottom = 5
-border_color = Color(0.081, 0.576, 1.038, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-expand_margin_left = 4.0
-expand_margin_right = 4.0
+border_color = Color(0.83116955, 0.95413095, 0, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="BattleScene" type="Control" unique_id=1730312365]
 layout_mode = 3
@@ -84,7 +79,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.16134733, 0.1729126, 0.20560166, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=260538747]
 layout_mode = 1
@@ -108,7 +103,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.65
-theme_override_styles/panel = ExtResource("3_drxpv")
+theme_override_styles/panel = ExtResource("3_jxadj")
 
 [node name="BattleBG" type="TextureRect" parent="MarginContainer/ContentSplit/VisualPanel" unique_id=200000040]
 unique_name_in_owner = true
@@ -176,7 +171,7 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = ExtResource("3_drxpv")
+theme_override_styles/panel = ExtResource("3_jxadj")
 
 [node name="ProblemMargin" type="MarginContainer" parent="MarginContainer/ContentSplit/RightVBox/ProblemPanel" unique_id=200000008]
 layout_mode = 1
@@ -204,7 +199,7 @@ autowrap_mode = 3
 [node name="AnswerPanel" type="PanelContainer" parent="MarginContainer/ContentSplit/RightVBox" unique_id=200000014]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = ExtResource("3_drxpv")
+theme_override_styles/panel = ExtResource("4_drxpv")
 
 [node name="AnswerMargin" type="MarginContainer" parent="MarginContainer/ContentSplit/RightVBox/AnswerPanel" unique_id=200000015]
 layout_mode = 2
@@ -228,10 +223,9 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_jxadj")
 theme_override_font_sizes/font_size = 36
-theme_override_styles/normal = SubResource("StyleBoxFlat_drxpv")
-theme_override_styles/focus = ExtResource("5_i4ha3")
+theme_override_styles/normal = SubResource("StyleBoxFlat_jxadj")
+theme_override_styles/focus = SubResource("StyleBoxFlat_kr4hl")
 placeholder_text = "Type your answer here..."
-
 
 [node name="BottomRow" type="HBoxContainer" parent="MarginContainer/ContentSplit/RightVBox" unique_id=200000043]
 layout_mode = 2
@@ -242,9 +236,9 @@ unique_name_in_owner = true
 layout_mode = 2
 theme = ExtResource("1_p51gn")
 theme_override_font_sizes/font_size = 48
-theme_override_styles/normal = SubResource("StyleBoxFlat_mhrs4")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_qaiw1")
-theme_override_styles/hover = SubResource("StyleBoxFlat_smqqk")
+theme_override_styles/normal = ExtResource("4_drxpv")
+theme_override_styles/pressed = ExtResource("4_drxpv")
+theme_override_styles/hover = ExtResource("4_drxpv")
 text = "Calc ▲"
 
 [node name="SubmitButton" type="Button" parent="MarginContainer/ContentSplit/RightVBox/BottomRow" unique_id=200000026]
@@ -253,11 +247,20 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("1_p51gn")
 theme_override_font_sizes/font_size = 48
-theme_override_styles/normal = SubResource("StyleBoxFlat_mhrs4")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_qaiw1")
-theme_override_styles/hover = SubResource("StyleBoxFlat_smqqk")
-theme_override_styles/disabled = ExtResource("5_drxpv")
+theme_override_styles/normal = ExtResource("4_drxpv")
+theme_override_styles/pressed = ExtResource("4_drxpv")
+theme_override_styles/disabled = ExtResource("4_drxpv")
 text = "Submit"
+
+[node name="FeedbackToggle" type="Button" parent="MarginContainer/ContentSplit/RightVBox/BottomRow" unique_id=200000080]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme = ExtResource("1_p51gn")
+theme_override_font_sizes/font_size = 48
+theme_override_styles/normal = ExtResource("4_drxpv")
+theme_override_styles/pressed = ExtResource("4_drxpv")
+text = "Hint ▲"
 
 [node name="CalcOverlay" type="Panel" parent="." unique_id=200000060]
 unique_name_in_owner = true
@@ -271,7 +274,7 @@ anchor_right = 0.64
 anchor_bottom = 0.99
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = ExtResource("3_drxpv")
+theme_override_styles/panel = SubResource("StyleBoxFlat_drxpv")
 
 [node name="CalcMargin" type="MarginContainer" parent="CalcOverlay" unique_id=200000061]
 layout_mode = 1
@@ -294,7 +297,6 @@ columns = 5
 
 [node name="FeedbackOverlay" type="Panel" parent="." unique_id=200000070]
 unique_name_in_owner = true
-visible = false
 z_index = 10
 layout_mode = 1
 anchors_preset = -1
@@ -304,9 +306,9 @@ anchor_right = 0.63
 anchor_bottom = 0.97
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = ExtResource("3_drxpv")
+theme_override_styles/panel = ExtResource("3_jxadj")
 
-[node name="FeedbackMargin" type="MarginContainer" parent="FeedbackOverlay"]
+[node name="FeedbackMargin" type="MarginContainer" parent="FeedbackOverlay" unique_id=1773273126]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -321,5 +323,22 @@ theme_override_constants/margin_bottom = 12
 [node name="StatusLabel" type="Label" parent="FeedbackOverlay/FeedbackMargin" unique_id=200000053]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 36
 autowrap_mode = 3
+
+[node name="FeedbackToggle" type="Button" parent="." unique_id=1858950383]
+z_index = 10
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.01
+anchor_top = 0.9
+anchor_right = 0.19
+anchor_bottom = 0.98
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_p51gn")
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxFlat_i4ha3")
+theme_override_styles/pressed = ExtResource("4_drxpv")
+theme_override_styles/hover = ExtResource("4_drxpv")
+text = "Help ▲"

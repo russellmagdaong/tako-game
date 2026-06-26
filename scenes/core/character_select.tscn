@@ -71,28 +71,33 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 0.15
-offset_top = -8.0
-offset_bottom = -8.0
+offset_left = -1471.0
+offset_top = -76.00001
+offset_right = -1471.0
+offset_bottom = -89.00001
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(2.5510173, 2.5510173)
+theme_override_font_sizes/font_size = 64
 text = "CHOOSE YOUR CHARACTER"
 label_settings = ExtResource("3_4q3yi")
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SpriteM" type="Sprite2D" parent="." unique_id=943366893]
-position = Vector2(104.00001, 120)
-scale = Vector2(6.5357146, 6.535717)
+position = Vector2(-32.999977, 270)
+scale = Vector2(19, 19.000006)
 texture = SubResource("AtlasTexture_onp6s")
 centered = false
 
 [node name="SpriteF" type="Sprite2D" parent="." unique_id=397626849]
-position = Vector2(864, 352)
-scale = Vector2(6.536, 6.536)
+position = Vector2(1419, 834)
+scale = Vector2(16.821573, 16.821571)
 texture = SubResource("AtlasTexture_4q3yi")
 flip_h = true
 
 [node name="Prompt2" type="Label" parent="." unique_id=840361295]
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.9

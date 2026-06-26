@@ -1,23 +1,18 @@
 extends Control
-# Dashboard. Port of frontend/app/home.tsx (Home / World / Settings tabs).
-# Decisions applied: no dark mode toggle, no XP. Stats come from local SQLite
-# and PlayerDataManager (no Supabase reads required).
 
-@export var bg_top: Color = Color("0b1430")
-@export var bg_bottom: Color = Color("17215e")
 @export var accent: Color = Color("ffd24a")
 @export var card_bg: Color = Color(1, 1, 1, 0.08)
+
 const CHARACTERS := ["playerm", "playerf"]
 const CHARACTER_LABELS := {"playerm": "Boy", "playerf": "Girl"}
 
 var _greeting: Label
-var _profile_name: Label
-var _profile_grade: Label
-var _panels := {} # name -> Control
-var _tab_buttons := {} # name -> Button
+var _panels := {}
+var _tab_buttons := {}
 var _active_tab := "home"
 
-# Home stat value labels
+var _profile_name: Label
+var _profile_grade: Label
 var _stat_monsters: Label
 var _stat_questions: Label
 var _stat_accuracy: Label
@@ -25,7 +20,6 @@ var _stat_streak: Label
 var _progress_bar: ProgressBar
 var _progress_label: Label
 
-# Settings widgets
 var _username_edit: LineEdit
 var _character_btn: Button
 var _character_index: int = 0
@@ -37,41 +31,22 @@ func _ready() -> void:
 
 	_character_index = maxi(0, CHARACTERS.find(PlayerDataManager.selected_character))
 
-	_build_background()
+	_greeting = get_node("%GreetingLabel")
 
-	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(root)
-
-	# Header
-	var header := MarginContainer.new()
-	header.add_theme_constant_override("margin_left", 40)
-	header.add_theme_constant_override("margin_right", 40)
-	header.add_theme_constant_override("margin_top", 28)
-	header.add_theme_constant_override("margin_bottom", 8)
-	root.add_child(header)
-	_greeting = Label.new()
-	_greeting.add_theme_font_size_override("font_size", 40)
-	_greeting.modulate = Color("ffffff")
-	header.add_child(_greeting)
-
-	# Content area (expands)
-	var content := MarginContainer.new()
-	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("margin_left", 40)
-	content.add_theme_constant_override("margin_right", 40)
-	content.add_theme_constant_override("margin_top", 8)
-	content.add_theme_constant_override("margin_bottom", 8)
-	root.add_child(content)
-
-	_panels["home"] = _build_home_panel()
-	_panels["world"] = _build_world_panel()
+	var content := get_node("%ContentArea")
+	_panels["home"]     = _build_home_panel()
+	_panels["world"]    = _build_world_panel()
 	_panels["settings"] = _build_settings_panel()
 	for key in _panels:
 		content.add_child(_panels[key])
 
-	# Tab bar (bottom)
-	root.add_child(_build_tab_bar())
+	_tab_buttons["home"]     = get_node("%HomeTab")
+	_tab_buttons["world"]    = get_node("%WorldTab")
+	_tab_buttons["settings"] = get_node("%SettingsTab")
+
+	_tab_buttons["home"].pressed.connect(_select_tab.bind("home"))
+	_tab_buttons["world"].pressed.connect(_select_tab.bind("world"))
+	_tab_buttons["settings"].pressed.connect(_select_tab.bind("settings"))
 
 	_select_tab("home")
 
@@ -87,7 +62,6 @@ func _build_home_panel() -> Control:
 	vb.add_theme_constant_override("separation", 22)
 	scroll.add_child(vb)
 
-	# Profile card
 	var profile := _make_card()
 	var pbody: VBoxContainer = profile.get_node("Content")
 	_profile_name = Label.new()
@@ -98,18 +72,16 @@ func _build_home_panel() -> Control:
 	pbody.add_child(_profile_grade)
 	vb.add_child(profile)
 
-	# Stats grid
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 18)
 	grid.add_theme_constant_override("v_separation", 18)
-	_stat_monsters = _add_stat_card(grid, "Monsters Defeated")
+	_stat_monsters  = _add_stat_card(grid, "Monsters Defeated")
 	_stat_questions = _add_stat_card(grid, "Questions Done")
-	_stat_accuracy = _add_stat_card(grid, "Accuracy")
-	_stat_streak = _add_stat_card(grid, "Best Streak")
+	_stat_accuracy  = _add_stat_card(grid, "Accuracy")
+	_stat_streak    = _add_stat_card(grid, "Best Streak")
 	vb.add_child(grid)
 
-	# Overall progress
 	var prog := _make_card()
 	var prog_body: VBoxContainer = prog.get_node("Content")
 	var plabel := Label.new()
@@ -126,7 +98,6 @@ func _build_home_panel() -> Control:
 	prog_body.add_child(_progress_label)
 	vb.add_child(prog)
 
-	# Continue adventure
 	var cont := _make_button("Continue Adventure", accent, Color("201600"))
 	cont.pressed.connect(func() -> void: GameManager.start_game_from_dashboard())
 	vb.add_child(cont)
@@ -172,7 +143,6 @@ func _build_settings_panel() -> Control:
 
 	vb.add_child(_section_label("PROFILE"))
 
-	# Username row
 	var uname := _make_card()
 	var urow := HBoxContainer.new()
 	urow.add_theme_constant_override("separation", 12)
@@ -187,7 +157,6 @@ func _build_settings_panel() -> Control:
 	urow.add_child(save_btn)
 	vb.add_child(uname)
 
-	# Character cycle
 	var char_row := _make_cycle_row("Character", _character_label_text())
 	_character_btn = char_row[1]
 	_character_btn.pressed.connect(_on_cycle_character)
@@ -206,28 +175,8 @@ func _build_settings_panel() -> Control:
 	return scroll
 
 # ---------------------------------------------------------------------------
-# Tabs
+# Tab selection
 # ---------------------------------------------------------------------------
-
-func _build_tab_bar() -> Control:
-	var panel := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0, 0, 0, 0.35)
-	sb.set_content_margin_all(10)
-	panel.add_theme_stylebox_override("panel", sb)
-
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	panel.add_child(row)
-
-	for key in ["home", "world", "settings"]:
-		var btn := _make_tab_button(str(key).capitalize())
-		btn.pressed.connect(_select_tab.bind(key))
-		row.add_child(btn)
-		_tab_buttons[key] = btn
-
-	return panel
 
 func _select_tab(tab_name: String) -> void:
 	_active_tab = tab_name
@@ -267,17 +216,16 @@ func _refresh_home() -> void:
 		accuracy = int(round(float(correct) / float(total) * 100.0))
 	var streak := _compute_best_streak(attempts)
 
-	_stat_monsters.text = str(monsters)
+	_stat_monsters.text  = str(monsters)
 	_stat_questions.text = str(total)
-	_stat_accuracy.text = "%d%%" % accuracy
-	_stat_streak.text = str(streak)
+	_stat_accuracy.text  = "%d%%" % accuracy
+	_stat_streak.text    = str(streak)
 
-	# Overall progress: achievements unlocked out of the known set.
 	var total_ach := PlayerDataManager.ACHIEVEMENTS.size()
 	var pct := 0.0
 	if total_ach > 0:
 		pct = float(PlayerDataManager.achievements.size()) / float(total_ach) * 100.0
-	_progress_bar.value = pct
+	_progress_bar.value  = pct
 	_progress_label.text = "%d%%" % int(round(pct))
 
 func _refresh_settings() -> void:
@@ -313,8 +261,7 @@ func _on_cycle_character() -> void:
 	_character_btn.text = _character_label_text()
 
 func _character_label_text() -> String:
-	var id: String = CHARACTERS[_character_index]
-	return CHARACTER_LABELS.get(id, id)
+	return CHARACTER_LABELS.get(CHARACTERS[_character_index], CHARACTERS[_character_index])
 
 func _user_id() -> String:
 	if not PlayerDataManager.user_id.is_empty():
@@ -322,25 +269,9 @@ func _user_id() -> String:
 	return DatabaseManager.get_or_create_local_user_id()
 
 # ---------------------------------------------------------------------------
-# UI helpers
+# UI helpers (panel content builders)
 # ---------------------------------------------------------------------------
 
-func _build_background() -> void:
-	var grad := Gradient.new()
-	grad.set_color(0, bg_top)
-	grad.set_color(1, bg_bottom)
-	var tex := GradientTexture2D.new()
-	tex.gradient = grad
-	tex.fill_from = Vector2(0, 0)
-	tex.fill_to = Vector2(0, 1)
-	var bg := TextureRect.new()
-	bg.texture = tex
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.stretch_mode = TextureRect.STRETCH_SCALE
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(bg)
-
-# Returns a PanelContainer styled as a card, with an inner VBox named "Content".
 func _make_card() -> PanelContainer:
 	var panel := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
@@ -386,7 +317,6 @@ func _section_label(text: String) -> Label:
 	label.add_theme_font_size_override("font_size", 22)
 	return label
 
-# Returns [panel, button] so the caller can wire the cycle action.
 func _make_cycle_row(title: String, value_text: String) -> Array:
 	var panel := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
@@ -452,27 +382,6 @@ func _make_language_toggle() -> Control:
 
 func _language_text() -> String:
 	return "Filipino" if Globals.preferred_language == "tl" else "English"
-
-func _make_tab_button(text: String) -> Button:
-	var btn := Button.new()
-	btn.text = text
-	btn.toggle_mode = true
-	btn.focus_mode = Control.FOCUS_NONE
-	btn.custom_minimum_size = Vector2(240, 64)
-	var off := StyleBoxFlat.new()
-	off.bg_color = Color(1, 1, 1, 0.06)
-	off.set_corner_radius_all(14)
-	off.set_content_margin_all(10)
-	var on := off.duplicate()
-	on.bg_color = accent
-	btn.add_theme_stylebox_override("normal", off)
-	btn.add_theme_stylebox_override("hover", off)
-	btn.add_theme_stylebox_override("pressed", on)
-	btn.add_theme_stylebox_override("hover_pressed", on)
-	btn.add_theme_color_override("font_color", Color("ffffff"))
-	btn.add_theme_color_override("font_pressed_color", Color("201600"))
-	btn.add_theme_color_override("font_hover_pressed_color", Color("201600"))
-	return btn
 
 func _make_small_button(text: String) -> Button:
 	var btn := Button.new()

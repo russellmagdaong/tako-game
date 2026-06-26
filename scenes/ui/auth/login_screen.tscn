@@ -1,12 +1,298 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://chkqopwpqo8jn"]
 
-[ext_resource type="Script" path="res://scripts/ui/auth/login_screen.gd" id="1"]
+[ext_resource type="Script" uid="uid://rumu77768jpu" path="res://scripts/ui/auth/login_screen.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://d0c1d3f552cmr" path="res://resources/fonts/dedicool/Dedicool.ttf" id="2_h7v6v"]
+[ext_resource type="Theme" uid="uid://dxl0ykafegkjr" path="res://resources/ui/ui_theme.tres" id="3_6v5wh"]
 
-[node name="LoginScreen" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_off"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 0.08)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_on"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.823529, 0.290196, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_submit_n"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(1, 0.823529, 0.290196, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.490196, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_submit_p"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.88, 0.72549, 0.254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.490196, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_submit_h"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(1, 0.858824, 0.403922, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.490196, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_n"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(1, 1, 1, 0.12)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.490196, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_p"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(1, 1, 1, 0.06)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.490196, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_h"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(1, 1, 1, 0.2)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.490196, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="LoginScreen" type="Control" unique_id=95109530]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=260697950]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=296845809]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Card" type="VBoxContainer" parent="CenterContainer" unique_id=145100248]
+custom_minimum_size = Vector2(640, 0)
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="CenterContainer/Card" unique_id=947808759]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.823529, 0.290196, 1)
+theme_override_fonts/font = ExtResource("2_h7v6v")
+theme_override_font_sizes/font_size = 72
+text = "TAKO"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/Card" unique_id=1326970788]
+layout_mode = 2
+theme = ExtResource("3_6v5wh")
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+text = "Teaching with Adaptive Knowledge Orchestration"
+horizontal_alignment = 1
+
+[node name="TabsRow" type="HBoxContainer" parent="CenterContainer/Card" unique_id=784545000]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="SigninTab" type="Button" parent="CenterContainer/Card/TabsRow" unique_id=720112845]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_6v5wh")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tab_on")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tab_on")
+toggle_mode = true
+button_pressed = true
+text = "Sign In"
+
+[node name="SignupTab" type="Button" parent="CenterContainer/Card/TabsRow" unique_id=1765163760]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_6v5wh")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tab_on")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tab_off")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tab_on")
+toggle_mode = true
+text = "Sign Up"
+
+[node name="UsernameField" type="VBoxContainer" parent="CenterContainer/Card" unique_id=1415218973]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="CenterContainer/Card/UsernameField" unique_id=969549621]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+text = "Username"
+
+[node name="UsernameEdit" type="LineEdit" parent="CenterContainer/Card/UsernameField" unique_id=1227827234]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+placeholder_text = "Username"
+
+[node name="EmailField" type="VBoxContainer" parent="CenterContainer/Card" unique_id=1314617791]
+layout_mode = 2
+theme = ExtResource("3_6v5wh")
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="CenterContainer/Card/EmailField" unique_id=1629723293]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+text = "Email"
+
+[node name="EmailEdit" type="LineEdit" parent="CenterContainer/Card/EmailField" unique_id=737546717]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+placeholder_text = "Email"
+keep_editing_on_text_submit = true
+
+[node name="PasswordField" type="VBoxContainer" parent="CenterContainer/Card" unique_id=758907083]
+layout_mode = 2
+theme = ExtResource("3_6v5wh")
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="CenterContainer/Card/PasswordField" unique_id=503248042]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+text = "Password"
+
+[node name="PasswordEdit" type="LineEdit" parent="CenterContainer/Card/PasswordField" unique_id=283057120]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+placeholder_text = "Password"
+secret = true
+
+[node name="ErrorLabel" type="Label" parent="CenterContainer/Card" unique_id=537403732]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme = ExtResource("3_6v5wh")
+theme_override_colors/font_color = Color(1, 0.419608, 0.419608, 1)
+autowrap_mode = 3
+
+[node name="SubmitButton" type="Button" parent="CenterContainer/Card" unique_id=1027553525]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_6v5wh")
+theme_override_colors/font_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_colors/font_hover_color = Color(0.12549, 0.086275, 0, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_submit_n")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_submit_p")
+theme_override_styles/hover = SubResource("StyleBoxFlat_submit_h")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_submit_n")
+text = "Sign In"
+
+[node name="BackButton" type="Button" parent="CenterContainer/Card" unique_id=1388750840]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_6v5wh")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_back_n")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_back_p")
+theme_override_styles/hover = SubResource("StyleBoxFlat_back_h")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_back_n")
+text = "Back"
